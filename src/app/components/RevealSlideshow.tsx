@@ -188,7 +188,9 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         setReady(true);
       }
 
-      init();
+      init().catch((err) => {
+        console.error("Failed to initialize reveal.js:", err);
+      });
 
       return () => {
         destroyed = true;
