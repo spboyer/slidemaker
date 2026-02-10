@@ -174,7 +174,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         loadRevealBaseCSS();
         loadHighlightCSS();
 
-        if (destroyed) return;
+        if (destroyed || !containerRef.current) return;
 
         const deck = new Reveal(containerRef.current, {
           hash: false,
@@ -257,6 +257,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
       <div
         ref={containerRef}
         className="reveal relative h-full w-full"
+        style={{ minHeight: 400 }}
         tabIndex={0}
         role="region"
         aria-label="Slide presentation"
