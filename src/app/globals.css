@@ -96,16 +96,22 @@ body {
 }
 
 /* Pre/Code: Tailwind sets code,pre { font-family: tailwind-mono; font-size: 1em }
-   at (0,0,1). Theme .reveal pre at (0,1,1) wins, but keep for safety. */
+   at (0,0,1). We must NOT use font-size:revert — it reverts to UA inherit which
+   picks up .reveal's 42px base. Instead let theme's .reveal pre (0,1,1) handle
+   font-size (0.55em). We only revert font-family, margin, and add explicit
+   background/padding/border-radius so code blocks render like the reveal.js demo. */
 .reveal .slides pre {
   font-family: revert;
-  font-size: revert;
   margin: revert;
+  background: #3f3f3f;
+  padding: 20px;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
 }
 
 .reveal .slides code {
   font-family: revert;
-  font-size: revert;
 }
 
 /* Links: Tailwind resets a { color: inherit; text-decoration: inherit } at (0,0,1).
@@ -157,15 +163,11 @@ body {
 }
 
 /*
- * Fragment animations: ensure Tailwind doesn't interfere with reveal.js
- * fragment transitions (opacity, transform, visibility).
+ * Fragment animations: reveal.js manages fragment opacity/transform/visibility
+ * itself. Do NOT revert these — reveal.js sets fragments to opacity:0 initially
+ * and animates them in. Reverting would set opacity to 1 (visible), breaking
+ * the animation. Only revert transition timing if needed.
  */
-.reveal .slides .fragment {
-  opacity: revert;
-  transform: revert;
-  visibility: revert;
-  transition: revert;
-}
 
 /* Ensure overview mode pointer events are not blocked */
 .reveal.overview .slides section {
