@@ -54,6 +54,152 @@ describe("Type compilation (TC-9.6)", () => {
   });
 });
 
+// ─── Reveal.js integration: extended types ──────────────────────────────────
+
+describe("Extended Slide type (reveal.js fields)", () => {
+  it("Slide accepts transition, backgroundColor, layout fields", () => {
+    const slide: Slide = {
+      title: "Reveal Slide",
+      content: "Body text",
+      transition: "zoom",
+      backgroundColor: "#1a1a2e",
+      layout: "two-column",
+    };
+    expect(slide.transition).toBe("zoom");
+    expect(slide.backgroundColor).toBe("#1a1a2e");
+    expect(slide.layout).toBe("two-column");
+  });
+
+  it("all SlideTransition values are accepted", () => {
+    const transitions: Array<Slide["transition"]> = [
+      "none",
+      "fade",
+      "slide",
+      "convex",
+      "concave",
+      "zoom",
+    ];
+    transitions.forEach((t) => {
+      const s: Slide = { title: "T", content: "C", transition: t };
+      expect(s.transition).toBe(t);
+    });
+  });
+
+  it("all SlideLayout values are accepted", () => {
+    const layouts: Array<Slide["layout"]> = [
+      "default",
+      "center",
+      "two-column",
+    ];
+    layouts.forEach((l) => {
+      const s: Slide = { title: "T", content: "C", layout: l };
+      expect(s.layout).toBe(l);
+    });
+  });
+});
+
+describe("Extended Presentation type (reveal.js fields)", () => {
+  it("Presentation accepts theme and transition fields", () => {
+    const pres: Presentation = {
+      id: "themed",
+      title: "Themed Deck",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      slides: [{ title: "S1", content: "C1" }],
+      theme: "moon",
+      transition: "fade",
+    };
+    expect(pres.theme).toBe("moon");
+    expect(pres.transition).toBe("fade");
+  });
+
+  it("theme and transition are optional (backwards compatible)", () => {
+    const pres: Presentation = {
+      id: "no-theme",
+      title: "Legacy Deck",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      slides: [{ title: "S1", content: "C1" }],
+    };
+    expect(pres.theme).toBeUndefined();
+    expect(pres.transition).toBeUndefined();
+  });
+});
+
+// ─── Reveal.js theme validation ─────────────────────────────────────────────
+
+import { REVEAL_THEMES, isValidTheme } from "../lib/reveal-themes";
+
+describe("Theme validation — isValidTheme()", () => {
+  const validThemes = [
+    "black", "white", "league", "sky", "beige",
+    "simple", "serif", "blood", "night", "moon", "solarized",
+  ];
+
+  it.each(validThemes)("accepts valid theme: %s", (theme) => {
+    expect(isValidTheme(theme)).toBe(true);
+  });
+
+  it.each(["invalid", "darcula", "monokai", "", "BLACK", "White"])(
+    "rejects invalid theme: '%s'",
+    (theme) => {
+      expect(isValidTheme(theme)).toBe(false);
+    }
+  );
+});
+
+describe("REVEAL_THEMES metadata", () => {
+  it("has exactly 11 entries", () => {
+    expect(REVEAL_THEMES).toHaveLength(11);
+  });
+
+  it("every entry has id, name, previewBackground, previewTextColor", () => {
+    REVEAL_THEMES.forEach((theme) => {
+      expect(theme).toHaveProperty("id");
+      expect(theme).toHaveProperty("name");
+      expect(theme).toHaveProperty("previewBackground");
+      expect(theme).toHaveProperty("previewTextColor");
+      expect(typeof theme.id).toBe("string");
+      expect(typeof theme.name).toBe("string");
+      expect(theme.previewBackground).toMatch(/^#[0-9a-fA-F]{6}$/);
+      expect(theme.previewTextColor).toMatch(/^#[0-9a-fA-F]{6}$/);
+    });
+  });
+
+  it("each theme id is unique", () => {
+    const ids = REVEAL_THEMES.map((t) => t.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+// ─── Backwards compatibility ────────────────────────────────────────────────
+
+describe("Backwards compatibility (v1 format)", () => {
+  it("a v1 Slide (only title + content) satisfies Slide type", () => {
+    const v1Slide: Slide = { title: "Hello", content: "World" };
+    expect(v1Slide.title).toBe("Hello");
+    expect(v1Slide.content).toBe("World");
+    expect(v1Slide.transition).toBeUndefined();
+    expect(v1Slide.backgroundColor).toBeUndefined();
+    expect(v1Slide.layout).toBeUndefined();
+  });
+
+  it("a v1 Presentation (no theme/transition) satisfies Presentation type", () => {
+    const v1: Presentation = {
+      id: "legacy",
+      title: "Legacy Pres",
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+      slides: [{ title: "S", content: "C" }],
+    };
+    expect(v1.theme).toBeUndefined();
+    expect(v1.transition).toBeUndefined();
+    expect(v1.slides[0].transition).toBeUndefined();
+    expect(v1.slides[0].backgroundColor).toBeUndefined();
+    expect(v1.slides[0].layout).toBeUndefined();
+  });
+});
+
 // ─── TC-9.5 / TC-7.x: API route handler tests ──────────────────────────────
 // Test CRUD API handlers directly by importing route functions.
 // Uses a temp directory to avoid polluting real data.
