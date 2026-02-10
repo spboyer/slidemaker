@@ -66,3 +66,4 @@
 - Updated `RevealSlideshow.tsx` `sectionAttrs()` to render `data-auto-animate` and `data-background-gradient` attributes.
 - All changes backward compatible — new fields are optional, existing presentations render unchanged.
 - Branch: `squad/36-ai-prompt-upgrade`, PR #39.
+📌 Team update (2026-02-10): Playwright e2e tests available via `npm run test:e2e` — use `e2e/helpers.ts` for fixtures, follow skip pattern for API-dependent tests — decided by Fenster

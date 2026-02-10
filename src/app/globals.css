@@ -24,3 +24,49 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+ * Undo Tailwind v4 base resets inside reveal.js slides.
+ * `all: revert` restores browser defaults so reveal.js theme styles
+ * (which rely on UA styles) take precedence for all 11 themes.
+ */
+.reveal .slides h1,
+.reveal .slides h2,
+.reveal .slides h3,
+.reveal .slides h4,
+.reveal .slides h5,
+.reveal .slides h6,
+.reveal .slides p,
+.reveal .slides ul,
+.reveal .slides ol,
+.reveal .slides li,
+.reveal .slides blockquote,
+.reveal .slides table,
+.reveal .slides thead,
+.reveal .slides tbody,
+.reveal .slides th,
+.reveal .slides td,
+.reveal .slides tr,
+.reveal .slides pre,
+.reveal .slides code,
+.reveal .slides a,
+.reveal .slides img,
+.reveal .slides strong,
+.reveal .slides b,
+.reveal .slides em,
+.reveal .slides i,
+.reveal .slides small,
+.reveal .slides sub,
+.reveal .slides sup,
+.reveal .slides dl,
+.reveal .slides dt,
+.reveal .slides dd,
+.reveal .slides figure,
+.reveal .slides figcaption {
+  all: revert;
+}
+
+/* Ensure overview mode pointer events are not blocked */
+.reveal.overview .slides section {
+  cursor: pointer;
+}
