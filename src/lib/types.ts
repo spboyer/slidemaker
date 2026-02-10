@@ -15,7 +15,9 @@ export interface Slide {
   backgroundImage?: string;
   transition?: SlideTransition;
   backgroundColor?: string;
+  backgroundGradient?: string;
   layout?: SlideLayout;
+  autoAnimate?: boolean;
 }
 
 export interface Presentation {

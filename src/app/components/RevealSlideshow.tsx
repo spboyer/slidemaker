@@ -58,6 +58,9 @@ function sectionAttrs(slide: Slide) {
     attrs["data-background-image"] = slide.backgroundImage;
   if (slide.backgroundColor)
     attrs["data-background-color"] = slide.backgroundColor;
+  if (slide.backgroundGradient)
+    attrs["data-background-gradient"] = slide.backgroundGradient;
+  if (slide.autoAnimate) attrs["data-auto-animate"] = "";
   return attrs;
 }
 
