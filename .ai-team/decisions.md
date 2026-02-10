@@ -236,29 +236,19 @@ All new Slide fields remain optional — backward compatible. Build passes, 50 u
 
 ---
 
-### Remove r-fit-text from AI Generation Prompt
-**Author:** McManus (Backend Dev) · **Date:** 2026-02-10
+### r-fit-text Elimination (Prompt + Rendering)
+**Authors:** McManus (Backend Dev), Verbal (Frontend Dev) · **Date:** 2026-02-10
 
-Removed r-fit-text instructions from SYSTEM_PROMPT — AI no longer generates slides with the `r-fit-text` class. The fitty library used by reveal.js for r-fit-text causes uncaught TypeError crashes in React due to stale DOM references in rAF loops. Verbal also strips r-fit-text on the rendering side.
-
----
-
-### Tailwind v4 / reveal.js CSS Isolation Strategy (Updated)
-**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issues:** #32, #33, #34
-
-Original approach used `all: revert` on all content elements scoped to `.reveal .slides`. This was replaced with targeted property-level reverts (see "CSS Scoping: Replace `all: revert`" decision below) after Keyser's audit revealed it was destroying theme styles.
-
-Plugin loading convention and overview mode fix remain unchanged:
-- Plugins (Highlight, Notes, Zoom) dynamically imported alongside reveal.js.
-- highlight.js Monokai CSS loaded via CDN `<link>` tag with cleanup on unmount.
-- `overviewhidden` event syncs `currentSlideIndex` when leaving overview mode.
+The fitty library used by reveal.js for `r-fit-text` causes uncaught `TypeError` crashes in React due to stale DOM references in `requestAnimationFrame` loops. Eliminated on both sides:
+- **Prompt:** Removed r-fit-text instructions from SYSTEM_PROMPT — AI no longer generates slides with the class.
+- **Rendering:** `stripFitText()` in `RevealSlideshow.tsx` strips the `r-fit-text` class from slide HTML before `dangerouslySetInnerHTML`, preventing fitty activation.
 
 ---
 
-### CSS Scoping: Replace `all: revert` with Targeted Property Reverts
-**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+### Tailwind v4 / reveal.js CSS Isolation Strategy (Consolidated)
+**Authors:** Verbal (Frontend Dev), Keyser (Lead) · **Date:** 2026-02-10 · **Issues:** #32, #33, #34
 
-Replaced the nuclear `all: revert` rule (applied to 30+ elements inside `.reveal .slides`) with targeted `revert` on only the specific properties Tailwind v4's base layer resets:
+**Evolution:** Original `all: revert` on 30+ elements scoped to `.reveal .slides` was destroying theme styles (fonts, colors, heading sizes, fragment animations). Keyser's audit identified this as P0. Replaced with targeted property-level reverts:
 - `margin`, `padding` (headings, paragraphs, lists, blockquotes, tables, figures)
 - `font-size`, `font-weight` (headings)
 - `font-family`, `font-size` (pre, code)
@@ -266,16 +256,13 @@ Replaced the nuclear `all: revert` rule (applied to 30+ elements inside `.reveal
 - `border`, `padding`, `text-align` (table, th, td)
 - `color`, `text-decoration` (links)
 - `font-weight` on strong/b, `font-style` on em/i
-- `opacity`, `transform`, `visibility`, `transition` (on `.fragment`)
 
-Also added r-fit-text compensation CSS (standalone title headings render at 2.5–3em) and fragment animation preservation. All 11 themes now render correctly. Build passes, 50 unit tests pass.
+Fragment `opacity`, `transform`, `visibility`, `transition` reverts were subsequently removed (see "Code Block Rendering Fix" below) — they broke fragment animations.
 
----
-
-### Strip r-fit-text from Slide Content in RevealSlideshow
-**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
-
-The `r-fit-text` CSS class is stripped from slide HTML content before rendering via `stripFitText()` in `RevealSlideshow.tsx`. This prevents fitty's `requestAnimationFrame` loop from crashing when React reconciliation detaches DOM nodes that fitty still holds references to.
+Plugin loading convention unchanged:
+- Plugins (Highlight, Notes, Zoom) dynamically imported alongside reveal.js.
+- highlight.js Monokai CSS loaded via CDN `<link>` tag with cleanup on unmount.
+- `overviewhidden` event syncs `currentSlideIndex` when leaving overview mode.
 
 ---
 
@@ -283,3 +270,60 @@ The `r-fit-text` CSS class is stripped from slide HTML content before rendering 
 **Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Status:** Directive (Shayne Boyer)
 
 `black` set as the one and only default theme with `slide` transition. Matches the revealjs.com demo (`#191919` background, white text, Source Sans Pro font, `#42affa` link color). Updated defaults in `RevealSlideshow.tsx`, `page.tsx`, `route.ts` SYSTEM_PROMPT, and `untitled-presentation.json`. Fixed CSS specificity issue where `.reveal .slides h1` reverts at (0,2,1) were overriding theme heading sizes from `.reveal h1` at (0,1,1). Created 8-slide showcase presentation.
+
+---
+
+### Fix: reveal-viewport Background/Color Override — Tailwind Cascade
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+
+Playwright computed style inspection revealed that `.reveal-viewport` had `backgroundColor: rgb(255, 255, 255)` (white) instead of the black theme's `--r-background-color: #191919`. Text color was `rgb(0, 0, 0)` instead of `--r-main-color: #fff`. Title headings were 105px instead of the expected 67px.
+
+**Root cause:** Tailwind's `:root { --background: #fff }` cascades through `body { background: var(--background) }` and wins over the theme's `.reveal-viewport { background-color: var(--r-background-color) }` at equal specificity. Similarly for `color: var(--foreground)`. The r-fit-text replacement CSS at specificity (0,4,1) was overriding theme heading sizes at (0,1,1).
+
+**Changes to `src/app/globals.css`:**
+1. Added `.reveal-viewport { background-color: var(--r-background-color, #191919) !important; color: var(--r-main-color, #fff) !important }` — forces reveal.js theme custom properties.
+2. Added `.reveal { color: var(--r-main-color, #fff) !important; font-family: var(--r-main-font) !important }` — prevents Tailwind body styles from cascading into slides.
+3. Removed all r-fit-text replacement heading rules (the `h1:first-child:last-of-type` and `h1:first-child:only-child` blocks) — theme already handles sizing correctly via `--r-heading1-size: 2.5em` and `--r-heading2-size: 1.6em`.
+
+**Why `!important`:** The Tailwind body cascade is structural — it flows through inherited properties. No specificity trick on `.reveal-viewport` alone beats an inherited `background` from `body`. `!important` is the correct and minimal solution.
+
+**Verified:** Build passes, 50 unit tests pass, 34 Playwright e2e tests pass.
+
+---
+
+### Code Block Rendering Fix — pre/code Styles and Fragment Revert
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Status:** Implemented
+
+Three CSS fixes in `src/app/globals.css` to make code blocks render like the reveal.js demo:
+
+1. **Removed `font-size: revert` on pre/code.** `revert` goes to UA default `inherit`, which inherits `.reveal`'s 42px base font — code text was 42px instead of ~23px. Now the theme's `.reveal pre { font-size: 0.55em }` at specificity (0,1,1) wins correctly, giving ~23px code text.
+
+2. **Added explicit code block styling.** Tailwind strips `pre` backgrounds, and without highlight.js theme activation the code block was fully transparent with no padding. Added: `background: #3f3f3f`, `padding: 20px`, `border-radius: 8px`, `overflow: auto`, `box-shadow: 0px 5px 15px rgba(0,0,0,0.15)` to `.reveal .slides pre`.
+
+3. **Removed fragment opacity/transform/visibility/transition revert.** reveal.js sets fragments to `opacity: 0` initially and animates them in. Our `opacity: revert` set it to 1 (visible), breaking all fragment animations — fragments were always visible instead of fading/sliding in.
+
+**Rule:** Never use `font-size: revert` on elements nested inside `.reveal` — the UA default for pre/code is `inherit`, which inherits the 42px base from `.reveal`, not the expected browser monospace sizing.
+
+**Verified:** Build passes, 50 unit tests pass, 34 Playwright e2e tests pass.
+
+---
+
+### highlight.js Activation Fix — Post-Render Re-Highlighting
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+
+**Problem:** The `RevealHighlight` plugin processes `<pre><code>` elements during `deck.initialize()`, adding syntax highlighting (`hljs` class, `data-highlighted` attribute, colored `<span>` elements, line-number tables). However, `setReady(true)` called after initialization triggers a React re-render. React's `dangerouslySetInnerHTML` reconciliation compares the original `slide.content` HTML string against the plugin-modified DOM, finds them different, and replaces the highlighted DOM with the original unprocessed HTML — wiping all syntax highlighting.
+
+**Root Cause:** React owns the DOM tree rendered via JSX. When a reveal.js plugin modifies DOM elements rendered by `dangerouslySetInnerHTML`, any subsequent React re-render (triggered by state changes like `setReady(true)`) will overwrite those modifications with the original HTML string. This is a fundamental tension between React's declarative DOM ownership and imperative plugin DOM manipulation.
+
+**Fix:** Added `highlightCodeBlocks()` utility in `RevealSlideshow.tsx` that:
+1. Gets the highlight plugin via `deck.getPlugin('highlight')`
+2. Queries `pre code:not([data-highlighted])` to find unprocessed code blocks
+3. Adds `code-wrapper` class to parent `<pre>` (normally done by plugin init)
+4. Trims whitespace if `data-trim` attribute is present
+5. Calls `plugin.highlightBlock(block)` which runs the plugin's own bundled hljs
+
+Called from:
+- A `useEffect` dependent on `ready` state — runs after the `setReady(true)` re-render
+- After `deck.sync()` in the content-change effect — handles dynamically added code blocks
+
+**Impact:** Code blocks now show full syntax highlighting with Monokai theme colors, line numbers, and fragment-based line highlighting steps. No new dependencies — uses the plugin's own bundled hljs instance. Build passes, 50 unit tests pass, 34 e2e tests pass.

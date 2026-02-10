@@ -27,3 +27,4 @@
 📌 Team update (2026-02-10): SYSTEM_PROMPT V2 deployed — 8-type slide taxonomy, strict HTML rules, curated backgrounds, theme intelligence — decided by McManus
 📌 Team update (2026-02-10): Console error detection e2e tests added — `page.on('pageerror')` catches uncaught JS errors during Playwright runs — decided by Fenster
 📌 Team update (2026-02-10): Default theme locked to "black" with slide transition — matches revealjs.com demo, CSS heading specificity fixed — decided by Verbal (directive by Shayne Boyer)
+📌 Team update (2026-02-10): Three CSS rendering fixes — viewport bg/color !important override, code block font-size/styling fix, hljs post-render re-highlighting — verified via Playwright computed styles — decided by Verbal
