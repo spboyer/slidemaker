@@ -66,6 +66,7 @@ function sectionAttrs(slide: Slide) {
 
 const THEME_LINK_ID = "reveal-theme-link";
 const BASE_CSS_LINK_ID = "reveal-base-css";
+const HIGHLIGHT_CSS_LINK_ID = "reveal-highlight-css";
 
 function loadRevealBaseCSS() {
   if (document.getElementById(BASE_CSS_LINK_ID)) return;
@@ -92,9 +93,20 @@ function loadThemeCSS(themeId: string) {
   document.head.appendChild(link);
 }
 
+function loadHighlightCSS() {
+  if (document.getElementById(HIGHLIGHT_CSS_LINK_ID)) return;
+  const link = document.createElement("link");
+  link.id = HIGHLIGHT_CSS_LINK_ID;
+  link.rel = "stylesheet";
+  link.href =
+    "https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/highlight/monokai.css";
+  document.head.appendChild(link);
+}
+
 function removeThemeCSS() {
   document.getElementById(THEME_LINK_ID)?.remove();
   document.getElementById(BASE_CSS_LINK_ID)?.remove();
+  document.getElementById(HIGHLIGHT_CSS_LINK_ID)?.remove();
 }
 
 const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
@@ -150,9 +162,16 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
 
         // Dynamic import — reveal.js requires browser globals
         const Reveal = (await import("reveal.js")).default;
+        const RevealHighlight = (
+          await import("reveal.js/plugin/highlight/highlight")
+        ).default;
+        const RevealNotes = (await import("reveal.js/plugin/notes/notes"))
+          .default;
+        const RevealZoom = (await import("reveal.js/plugin/zoom/zoom")).default;
 
-        // Ensure base CSS is loaded
+        // Ensure base CSS and highlight theme are loaded
         loadRevealBaseCSS();
+        loadHighlightCSS();
 
         if (destroyed) return;
 
@@ -171,6 +190,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
           minScale: 0.2,
           maxScale: 2.0,
           respondToHashChanges: false,
+          plugins: [RevealHighlight, RevealNotes, RevealZoom],
         });
 
         await deck.initialize();
@@ -188,6 +208,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         }
 
         deck.on("slidechanged", handleSlideChange);
+        deck.on("overviewhidden", handleSlideChange);
         setReady(true);
       }
 
@@ -199,6 +220,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         destroyed = true;
         if (deckRef.current) {
           deckRef.current.off("slidechanged", handleSlideChange);
+          deckRef.current.off("overviewhidden", handleSlideChange);
           deckRef.current.destroy();
           deckRef.current = null;
         }

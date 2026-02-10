@@ -178,3 +178,40 @@ reveal.js 5.x ships no TypeScript declarations — `src/types/reveal.d.ts` provi
 **Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **PR:** #31
 
 Replaced the default create-next-app boilerplate README with comprehensive SlideМaker documentation. The README now covers: features, tech stack, prerequisites (GitHub CLI), environment setup (gh auth login flow), usage guide with keyboard shortcuts, API reference for all endpoints, development commands, and project structure. No secrets or tokens are included — follows the team security directive. MIT license declared.
+
+---
+
+### AI Prompt Upgrade for High-Fidelity reveal.js Slides
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #36 · **PR:** #39
+
+The SYSTEM_PROMPT in `src/app/api/generate/route.ts` now instructs the AI to use rich reveal.js features:
+- **Auto-animate** (`autoAnimate: true` on Slide) — morphing transitions between consecutive slides
+- **r-fit-text** — auto-sizing text on title/impact slides
+- **Rich fragments** — 10 types (fade-up, grow, shrink, highlight-red, etc.) instead of basic `fragment`
+- **Code blocks with line highlighting** — `data-line-numbers="1|3-5|8"` for step-through
+- **Background gradients** — `backgroundGradient` field for CSS gradients on slides
+- **Styled tables and blockquotes** — with fragment rows and attribution
+
+Two new optional fields added to the `Slide` type (`src/lib/types.ts`):
+- `autoAnimate?: boolean`
+- `backgroundGradient?: string`
+
+`RevealSlideshow.tsx` updated to render these as `data-auto-animate` and `data-background-gradient` section attributes.
+
+STYLE_INSTRUCTIONS expanded with per-style feature guidance (professional: no flashy animations; creative: bold gradients + auto-animate; minimal: r-fit-text + fade only; technical: code blocks + dark themes).
+
+**Backward compatible** — all new fields are optional. Existing presentations render unchanged.
+
+---
+
+### Playwright E2E Test Setup
+**Author:** Fenster (Tester) · **Date:** 2026-02-10 · **Issue:** #37 · **PR:** #38
+
+1. **Chromium-only**: Playwright configured with Chromium only (not Firefox/WebKit) for CI speed. Can expand later if cross-browser coverage is needed.
+2. **File-based fixtures**: E2E test fixtures write JSON files directly to `presentations/` directory rather than using the API or AI generation. Tests independent of GitHub Models API.
+3. **Chat generation tests skip gracefully**: Tests in `chat-generation.spec.ts` skip via `test.skip()` when `/api/generate` returns auth errors (401/403). Prevents CI failures without `GITHUB_TOKEN`.
+4. **webServer auto-start**: `playwright.config.ts` uses `webServer.command: "npm run dev"` so `npm run test:e2e` is self-contained. `reuseExistingServer: true` in local dev.
+5. **Test isolation**: Each test file uses a unique presentation slug (`e2e-{feature}-test`) and cleans up in `afterAll` / `afterEach`.
+6. **reveal.js readiness**: Tests wait for `.reveal .slides section` to appear before interacting. `waitForReveal()` helper in `e2e/helpers.ts` handles this with a 15s timeout.
+
+**Impact:** `npm run test:e2e` runs the full Playwright suite. `e2e/helpers.ts` is the shared fixture module. Tests needing the AI API should follow the skip pattern in `chat-generation.spec.ts`. Playwright artifacts are gitignored.

@@ -14,6 +14,8 @@ declare module "reveal.js" {
     minScale?: number;
     maxScale?: number;
     respondToHashChanges?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    plugins?: any[];
     [key: string]: unknown;
   }
 
@@ -49,3 +51,6 @@ declare module "reveal.js" {
 }
 
 declare module "reveal.js/dist/reveal.css";
+declare module "reveal.js/plugin/highlight/highlight";
+declare module "reveal.js/plugin/notes/notes";
+declare module "reveal.js/plugin/zoom/zoom";

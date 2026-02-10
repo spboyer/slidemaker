@@ -33,3 +33,4 @@
 - **2026-02-10:** Test fixture strategy: `e2e/helpers.ts` creates/deletes presentation JSON files directly in `presentations/` directory. Avoids dependency on the AI generation API for most tests. Uses `beforeAll`/`afterAll` for setup/teardown.
 - **2026-02-10:** Key test patterns: (1) reveal.js readiness via `.reveal .slides section` selector; (2) theme changes verified by `#reveal-theme-link` href; (3) SlideNav buttons selected via `aria-label`; (4) chat generation tests skip when GitHub Models API unavailable; (5) editor tests verify persistence by re-reading via API after save.
 - **2026-02-10:** 7 e2e test files: CRUD, navigation, themes, code highlighting, overview mode, editor, chat generation. Script: `npm run test:e2e`.
+📌 Team update (2026-02-10): AI prompt now generates auto-animate, r-fit-text, rich fragments, code line highlighting, background gradients — new `autoAnimate` and `backgroundGradient` fields on Slide type — decided by McManus
