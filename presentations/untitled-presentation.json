@@ -1,48 +1,56 @@
 {
   "id": "untitled-presentation",
   "title": "Untitled Presentation",
-  "createdAt": "2026-02-10T22:19:35.156Z",
-  "updatedAt": "2026-02-10T22:19:35.156Z",
+  "createdAt": "2026-02-10T22:35:19.096Z",
+  "updatedAt": "2026-02-10T22:35:19.096Z",
   "slides": [
     {
       "title": "",
-      "content": "<h1>TypeScript Basics</h1><p>Write safer, scalable JavaScript</p>",
-      "notes": "Welcome the audience and introduce TypeScript. Mention how this talk will cover the core basics to help them get started. Ask: 'How many of you are already using TypeScript or considering adopting it?'",
+      "content": "<h1>TypeScript Best Practices</h1><p>Writing clean, scalable, and maintainable code</p>",
+      "notes": "Welcome the audience to the session. Spend a minute introducing the topic. Mention that this talk will focus on practical tips to improve TypeScript usage and ensure code quality. Ask: 'How many of you are currently using TypeScript in your projects?'",
       "transition": "fade",
       "backgroundGradient": "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)",
       "layout": "center"
     },
     {
-      "title": "Why TypeScript?",
-      "content": "<h2>Why TypeScript?</h2><ul><li class=\"fragment fade-up\">✅ Catch errors at compile time</li><li class=\"fragment fade-up\">📦 Add type safety to JavaScript</li><li class=\"fragment fade-up\">🚀 Improve developer productivity</li><li class=\"fragment fade-up\">📊 Scale projects more effectively</li></ul>",
-      "notes": "Spend ~2 minutes here. Explain each point briefly: compile-time errors prevent runtime surprises; type safety reduces bugs; productivity improves with better tooling; larger projects benefit from maintainable code. Transition: 'Now let's see how TypeScript achieves this.'",
-      "transition": "slide",
-      "backgroundColor": "#1a1a2e",
+      "title": "",
+      "content": "<h2>Why TypeScript?</h2><p>Adding type safety for robust JavaScript development</p>",
+      "notes": "Spend ~2 minutes here. Highlight why TypeScript has become the go-to choice for modern JavaScript projects. Discuss the importance of type safety in catching errors early and improving collaboration in teams. Transition: 'Now, let’s dive into some best practices for using TypeScript effectively.'",
+      "transition": "convex",
+      "backgroundGradient": "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+      "layout": "center"
+    },
+    {
+      "title": "Embrace Strict Mode",
+      "content": "<ul><li class=\"fragment fade-up\">Enable <code>strict</code> mode in your <code>tsconfig.json</code></li><li class=\"fragment fade-up\">Catch potential bugs early with stricter type checks</li><li class=\"fragment fade-up\">Recommended flags: <code>noImplicitAny</code>, <code>strictNullChecks</code>, <code>strictPropertyInitialization</code></li></ul>",
+      "notes": "Spend 3 minutes. Explain how enabling strict mode helps identify potential issues early in the development cycle. Walk through the key flags like noImplicitAny, strictNullChecks, and strictPropertyInitialization. Ask if anyone has stories about bugs caught by these settings.",
+      "transition": "fade",
+      "backgroundColor": "#1a1a3e",
       "layout": "default"
     },
     {
-      "title": "TypeScript in Action",
-      "content": "<h2>TypeScript in Action</h2><pre><code class=\"language-typescript\" data-trim data-noescape data-line-numbers=\"1-2|4|6\">// Define a type\ninterface User {\n  name: string;\n  age: number;\n}\n\n// Use the type\nconst user: User = {\n  name: 'Alice',\n  age: 25\n};</code></pre>",
-      "notes": "Spend ~3 minutes walking through the code. Highlight how the `User` interface defines the structure of an object. Point out TypeScript's ability to enforce type constraints, ensuring `name` is always a string and `age` is a number. Ask: 'What happens if we try to assign an invalid value?'",
-      "transition": "fade",
+      "title": "Prefer Type Aliases over Interfaces",
+      "content": "<ul><li class=\"fragment grow\">Type aliases are more versatile</li><li class=\"fragment grow\">Support for unions and intersections</li><li class=\"fragment grow\">Interfaces are still great for OOP-style programming</li></ul>",
+      "notes": "Spend ~2 minutes. Discuss the flexibility of type aliases in handling complex types like unions and intersections. However, mention that interfaces are still useful for specific use cases, particularly in object-oriented programming scenarios.",
+      "transition": "slide",
       "backgroundColor": "#16213e",
       "layout": "default"
     },
     {
-      "title": "",
-      "content": "<h2>Types vs Interfaces</h2><table><thead><tr><th>Feature</th><th>Type</th><th>Interface</th></tr></thead><tbody><tr><td>Extendable</td><td>✅</td><td>✅</td></tr><tr class=\"fragment\"><td>Union/Intersection</td><td>✅</td><td>🚫</td></tr><tr class=\"fragment\"><td>Declaration merging</td><td>🚫</td><td>✅</td></tr></tbody></table>",
-      "notes": "Spend ~3 minutes explaining the differences. Highlight key features with examples. For instance, types support unions, while interfaces allow declaration merging. Transition: 'Understanding these differences helps you decide which to use.'",
-      "transition": "convex",
+      "title": "Use Utility Types",
+      "content": "<pre><code data-trim data-noescape data-line-numbers=\"1-2|3-4|5-6\" class=\"language-typescript\">interface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\n// Partial: All properties optional\nconst partialUser: Partial<User> = { name: \"John\" };\n\n// Readonly: Prevent mutations\nconst readonlyUser: Readonly<User> = { id: 1, name: \"Alice\", email: \"alice@example.com\" };</code></pre>",
+      "notes": "Spend ~3 minutes. Explain how utility types like Partial and Readonly simplify common scenarios, reducing boilerplate code. Walk through the examples and show how these types make code cleaner and less error-prone.",
+      "transition": "none",
       "backgroundColor": "#0f3460",
-      "layout": "two-column"
+      "layout": "default"
     },
     {
       "title": "",
-      "content": "<h2>Start your TypeScript journey today! 🚀</h2><ul><li class=\"fragment fade-up\">Install: <code>npm install typescript</code></li><li class=\"fragment fade-up\">Add: <code>tsconfig.json</code> for project config</li><li class=\"fragment fade-up\">Try: Converting a small JS project</li></ul>",
-      "notes": "Wrap up the presentation with actionable next steps. Encourage the audience to install TypeScript and experiment with a small project. Offer to take questions and share resources for further learning. Thank them for attending!",
+      "content": "<h2>Good TypeScript = Better JavaScript ✅</h2>",
+      "notes": "Emphasize the importance of following best practices to leverage the full power of TypeScript. Encourage the audience to explore these tips in their projects and experiment with adding more type safety to their codebase. Transition: 'Let’s wrap up with the key takeaways.'",
       "transition": "zoom",
-      "backgroundGradient": "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-      "layout": "default"
+      "backgroundGradient": "linear-gradient(135deg, #2D1B69 0%, #8B2252 50%, #E84545 100%)",
+      "layout": "center"
     }
   ]
 }

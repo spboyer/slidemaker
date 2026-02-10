@@ -28,8 +28,8 @@ Return a JSON object with:
 - "slides": array of slide objects
 
 Each slide object must have:
-- "title": string — concise slide title (may be empty string for content-only slides)
-- "content": string — slide body as reveal.js-compatible HTML
+- "title": string — concise slide title (may be empty string for content-only slides). The renderer automatically renders this as an \`<h2>\` above the content — do NOT duplicate it in the content field.
+- "content": string — slide body as reveal.js-compatible HTML. Do NOT include an \`<h2>\` that repeats the title — the title is rendered separately. For cover slides, use \`<h1>\` in content with title set to empty string "".
 - "notes": string — speaker notes with talking points, timing cues, and engagement prompts
 
 Each slide may also include:
@@ -51,23 +51,24 @@ Every deck MUST start with a Cover slide and end with a Closing slide. Between t
 - Notes: include speaker intro, talk duration, audience context
 
 ### Section Divider
-- Single \`<h2>\` centered, with optional brief \`<p>\` subtitle below
+- Set "title" to empty string "". Put a single \`<h2>\` in "content", with optional brief \`<p>\` subtitle below
 - Contrasting solid or gradient background — pick from a complementary palette
 - Layout: "center"
 - No bullet points. Let the section title breathe.
 
 ### Content Slide
-- \`<h2>\` title + body with bullets or short text
-- Body: 3-5 bullet items MAX, or 2-3 sentences MAX
+- Set "title" to the slide heading — it renders as \`<h2>\` automatically
+- Body in "content": 3-5 bullet items MAX, or 2-3 sentences MAX — NO \`<h2>\` tag
 - Use fragments on ~60% of content slides (not all of them)
 
 ### Code Slide
-- \`<h2>\` title + \`<pre><code>\` block
+- Set "title" to the slide heading — it renders as \`<h2>\` automatically
+- "content": \`<pre><code>\` block only — NO \`<h2>\` tag
 - Code MUST use \`data-trim data-noescape\` and SHOULD use \`data-line-numbers\` with pipe-separated step-through ranges
 - Dark background recommended for code slides
 
 ### Comparison Slide
-- Two-column layout or HTML table
+- Set "title" to the slide heading. "content": two-column layout or HTML table — NO \`<h2>\` tag
 - Use for before/after, pros/cons, feature comparisons
 
 ### Quote Slide
@@ -86,9 +87,9 @@ Every deck MUST start with a Cover slide and end with a Closing slide. Between t
 - Gradient or themed background to bookend with the cover
 
 ## Typography Rules
-- Cover/title slides: \`<h1>\` — short impactful text (3-7 words)
-- Section dividers: \`<h2>\` centered with optional \`<p>\` subtitle
-- Content slides: \`<h2>\` for title, body text below
+- Cover/title slides: set "title" to "" and use \`<h1>\` in "content" — short impactful text (3-7 words)
+- Section dividers: set "title" to "" and use \`<h2>\` in "content" centered with optional \`<p>\` subtitle
+- Content/code/comparison slides: set "title" to the heading text — the renderer adds \`<h2>\` automatically. Do NOT put \`<h2>\` in "content"
 - NEVER use \`<h1>\` outside the cover slide
 - Keep text SHORT — the demo never has more than 3-4 lines per slide
 

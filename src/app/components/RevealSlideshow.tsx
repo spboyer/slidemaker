@@ -39,6 +39,43 @@ function stripFitText(html: string): string {
     .replace(/\br-fit-text\b/g, '');
 }
 
+/**
+ * Re-run the RevealHighlight plugin on any code blocks that weren't
+ * processed (e.g. due to React StrictMode replacing DOM elements after
+ * the plugin's init already ran).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function highlightCodeBlocks(deck: any, container: HTMLElement) {
+  const plugin = deck.getPlugin('highlight');
+  if (!plugin) {
+    console.warn('[SlideМaker] highlight plugin not found');
+    return;
+  }
+
+  const unprocessed = container.querySelectorAll('pre code:not([data-highlighted])');
+  if (unprocessed.length === 0) return;
+
+  // Use plugin.hljs if available, otherwise fall back to plugin.highlightBlock
+  const hljs = plugin.hljs;
+  unprocessed.forEach((block: Element) => {
+    // Add the wrapper class the plugin normally adds in init
+    block.parentElement?.classList.add('code-wrapper');
+
+    // Trim whitespace if data-trim is present (plugin init logic)
+    if (block.hasAttribute('data-trim') && typeof (block as HTMLElement).innerHTML.trim === 'function') {
+      (block as HTMLElement).innerHTML = (block as HTMLElement).innerHTML.trim();
+    }
+
+    if (hljs && typeof hljs.highlightElement === 'function') {
+      // Use hljs directly to avoid line-number fragment creation
+      hljs.highlightElement(block);
+    } else if (typeof plugin.highlightBlock === 'function') {
+      // Fallback to plugin method
+      plugin.highlightBlock(block);
+    }
+  });
+}
+
 /** Render slide content — supports HTML (contains tags) or plain markdown */
 function SlideContent({ slide }: { slide: Slide }) {
   const isHTML = /<[a-z][\s\S]*>/i.test(slide.content);
@@ -243,6 +280,35 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [presentation.id, presentation.slides.length]);
 
+    // Re-highlight code blocks after React re-render.
+    // The RevealHighlight plugin processes <pre><code> during deck.initialize(),
+    // but React re-renders replace the plugin-modified DOM with original HTML.
+    // Use MutationObserver to detect when React replaces code block content
+    // and re-apply highlighting.
+    useEffect(() => {
+      if (!ready || !deckRef.current || !containerRef.current) return;
+
+      // Initial highlight pass
+      highlightCodeBlocks(deckRef.current, containerRef.current);
+
+      // Watch for DOM mutations that reset code blocks (React reconciliation)
+      const observer = new MutationObserver(() => {
+        if (deckRef.current && containerRef.current) {
+          const unprocessed = containerRef.current.querySelectorAll('pre code:not([data-highlighted])');
+          if (unprocessed.length > 0) {
+            highlightCodeBlocks(deckRef.current, containerRef.current);
+          }
+        }
+      });
+
+      observer.observe(containerRef.current, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => observer.disconnect();
+    }, [ready]);
+
     // Theme switching — inject/swap CSS <link>
     useEffect(() => {
       loadThemeCSS(theme);
@@ -266,6 +332,10 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         prevSlidesJson.current = slidesJson;
         try {
           deckRef.current.sync();
+          // Highlight any new code blocks added by content changes
+          if (containerRef.current) {
+            highlightCodeBlocks(deckRef.current, containerRef.current);
+          }
         } catch {
           // fitty (r-fit-text) may throw if elements are mid-transition
         }
