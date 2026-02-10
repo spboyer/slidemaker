@@ -53,3 +53,16 @@
 - Branch: `squad/12-github-models-api`
 📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
 📌 Team update (2026-02-10): Always update docs, tests, and agents.md when making changes — directive by Shayne Boyer
+
+### 2026-02-10 — Upgraded AI Prompt for High-Fidelity reveal.js Slides (Issue #36)
+- Rewrote SYSTEM_PROMPT in `src/app/api/generate/route.ts` from a basic formatter to a comprehensive reveal.js designer prompt.
+- Prompt engineering techniques used:
+  - **Few-shot examples**: Included JSON examples of auto-animate slide pairs so the model sees concrete output format.
+  - **Feature enumeration with HTML snippets**: Listed each reveal.js feature (r-fit-text, fragments, code blocks, tables, blockquotes) with exact HTML syntax so the model copies the patterns.
+  - **Critical Variety Rules**: Explicit negative constraints ("Do NOT make every slide a bullet list") plus minimum diversity thresholds ("at least 2 different fragment types").
+  - **Per-style guidance**: Expanded STYLE_INSTRUCTIONS from 1-line hints to detailed multi-line directives with specific feature/transition/background recommendations per style.
+- Key reveal.js features added to prompt: auto-animate (`data-auto-animate`), `r-fit-text`, 10 fragment types (fade-in, fade-up, grow, shrink, fade-in-then-out, fade-in-then-semi-out, highlight-red/blue/green), code blocks with `data-line-numbers` pipe syntax, `backgroundGradient` for CSS gradients, styled tables with fragment rows, blockquotes with `<footer>` attribution.
+- Extended `Slide` type with optional `autoAnimate: boolean` and `backgroundGradient: string` fields.
+- Updated `RevealSlideshow.tsx` `sectionAttrs()` to render `data-auto-animate` and `data-background-gradient` attributes.
+- All changes backward compatible — new fields are optional, existing presentations render unchanged.
+- Branch: `squad/36-ai-prompt-upgrade`, PR #39.
