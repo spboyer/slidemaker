@@ -133,7 +133,10 @@ export class BlobStorage implements StorageProvider {
       const container = await this.clientPromise;
       const blob = container.getBlockBlobClient(this.blobName(userId, slug));
       const response = await blob.download(0);
-      const body = await streamToString(response.readableStreamBody!);
+      if (!response.readableStreamBody) {
+        throw new Error("Failed to download blob: no readable stream");
+      }
+      const body = await streamToString(response.readableStreamBody);
       return JSON.parse(body) as Presentation;
     } catch (error: unknown) {
       if (error && typeof error === "object" && "statusCode" in error && (error as { statusCode: number }).statusCode === 404) {
@@ -153,7 +156,10 @@ export class BlobStorage implements StorageProvider {
       try {
         const blobClient = container.getBlockBlobClient(blob.name);
         const response = await blobClient.download(0);
-        const body = await streamToString(response.readableStreamBody!);
+        if (!response.readableStreamBody) {
+          throw new Error("Failed to download blob: no readable stream");
+        }
+        const body = await streamToString(response.readableStreamBody);
         const data = JSON.parse(body) as Presentation;
         results.push({
           id: data.id,
