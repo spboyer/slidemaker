@@ -61,6 +61,7 @@ function sectionAttrs(slide: Slide) {
   if (slide.backgroundGradient)
     attrs["data-background-gradient"] = slide.backgroundGradient;
   if (slide.autoAnimate) attrs["data-auto-animate"] = "";
+  if (slide.layout === "center") attrs["data-state"] = "center";
   return attrs;
 }
 
@@ -266,10 +267,17 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
             <section
               key={i}
               {...sectionAttrs(slide)}
+              className={slide.layout === "center" ? "center" : undefined}
               data-notes={slide.notes ?? undefined}
             >
               {slide.title && <h2>{slide.title}</h2>}
-              <SlideContent slide={slide} />
+              {slide.layout === "two-column" ? (
+                <div className="r-hstack">
+                  <SlideContent slide={slide} />
+                </div>
+              ) : (
+                <SlideContent slide={slide} />
+              )}
             </section>
           ))}
         </div>
