@@ -6,7 +6,7 @@
   "slides": [
     {
       "title": "",
-      "content": "<h2 class=\"r-fit-text\">TypeScript Best Practices</h2>",
+      "content": "<h2>TypeScript Best Practices</h2>",
       "notes": "Introduce the topic with a punch. TypeScript is a powerful tool for scaling JavaScript development. This slide sets the tone for the session.",
       "transition": "zoom",
       "backgroundGradient": "linear-gradient(to bottom, #1e3c72, #2a5298)",

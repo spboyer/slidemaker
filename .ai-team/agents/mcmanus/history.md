@@ -67,3 +67,12 @@
 - All changes backward compatible — new fields are optional, existing presentations render unchanged.
 - Branch: `squad/36-ai-prompt-upgrade`, PR #39.
 📌 Team update (2026-02-10): Playwright e2e tests available via `npm run test:e2e` — use `e2e/helpers.ts` for fixtures, follow skip pattern for API-dependent tests — decided by Fenster
+
+### 2026-02-10 — Removed r-fit-text from AI Generation Prompt
+- Removed the `r-fit-text` section (was section 2) from `SYSTEM_PROMPT` in `src/app/api/generate/route.ts` — the AI will no longer instruct slides to use `class="r-fit-text"`.
+- Removed the Critical Variety Rule that required `r-fit-text` on the title/cover slide.
+- Updated the example slide in the prompt to use plain `<h2>` instead of `<h2 class="r-fit-text">`.
+- Renumbered remaining prompt sections: Rich Fragments→2, Code Blocks→3, Backgrounds→4, Tables→5, Blockquotes→6.
+- Stripped `r-fit-text` from `presentations/untitled-presentation.json` (the only existing presentation file containing it).
+- **Reason:** reveal.js's fitty library (used by `r-fit-text`) runs a `requestAnimationFrame` loop that crashes with `TypeError: Cannot read properties of null (reading 'clientWidth')` when React reconciles and removes DOM nodes. Verbal is also stripping `r-fit-text` on the rendering side.
+- Build and all 50 unit tests pass.

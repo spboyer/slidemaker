@@ -47,13 +47,7 @@ Create slide pairs where elements morph between states. Set "autoAnimate": true 
 - Code block evolving (adding lines, refactoring)
 - A list growing from 2 items to 5 items
 
-### 2. r-fit-text
-Use \`<h2 class="r-fit-text">Big Impact Text</h2>\` to auto-size text to fill the slide. Best for:
-- Title/cover slides
-- Single-statement impact slides
-- Section divider slides
-
-### 3. Rich Fragment Types
+### 2. Rich Fragment Types
 Go beyond basic \`class="fragment"\`. Use varied fragment animations:
 - \`<li class="fragment fade-in">\` — standard fade in
 - \`<li class="fragment fade-up">\` — slide up while fading in
@@ -66,7 +60,7 @@ Go beyond basic \`class="fragment"\`. Use varied fragment animations:
 - \`<span class="fragment highlight-green">\` — highlight text green
 Vary fragment types across slides — do NOT use the same type on every slide.
 
-### 4. Code Blocks with Line Highlighting
+### 3. Code Blocks with Line Highlighting
 For code, use \`<pre><code>\` with these attributes:
 \`\`\`html
 <pre><code class="language-javascript" data-trim data-noescape data-line-numbers="1-2|4-6|8">
@@ -83,13 +77,13 @@ function hello() {
 \`\`\`
 The data-line-numbers attribute enables step-through highlighting — pipe-separated ranges highlight progressively.
 
-### 5. Background Variations
+### 4. Background Variations
 Vary slide backgrounds to create visual rhythm:
 - Solid colors: use "backgroundColor" field
 - Gradients: use "backgroundGradient" field with CSS gradients like "linear-gradient(to right, #fc5c7d, #6a82fb)"
 - Do NOT make every slide the same background — create visual contrast between sections
 
-### 6. Styled Tables
+### 5. Styled Tables
 Use clean HTML tables for data:
 \`\`\`html
 <table>
@@ -101,7 +95,7 @@ Use clean HTML tables for data:
 </table>
 \`\`\`
 
-### 7. Blockquotes with Attribution
+### 6. Blockquotes with Attribution
 \`\`\`html
 <blockquote cite="Author Name">
   <p>"The best way to predict the future is to invent it."</p>
@@ -114,7 +108,6 @@ Use clean HTML tables for data:
 - Vary transitions across slides — don't use the same transition for every slide.
 - Use at least 2 different fragment types across the deck.
 - Include at least 1 auto-animate slide pair per 5 slides.
-- Use r-fit-text on at least the title/cover slide.
 - Vary backgrounds — use at least 2 different background treatments (solid, gradient, or default).
 
 ## Example High-Quality Slide (for reference)
@@ -122,7 +115,7 @@ A well-crafted slide combining multiple features:
 \`\`\`json
 {
   "title": "",
-  "content": "<h2 class=\\"r-fit-text\\">Why Microservices?</h2>",
+  "content": "<h2>Why Microservices?</h2>",
   "notes": "Pause here for impact. Let the audience absorb the question before moving on.",
   "transition": "zoom",
   "backgroundGradient": "linear-gradient(to bottom right, #0f0c29, #302b63, #24243e)",

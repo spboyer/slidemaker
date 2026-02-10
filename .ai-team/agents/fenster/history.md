@@ -34,3 +34,5 @@
 - **2026-02-10:** Key test patterns: (1) reveal.js readiness via `.reveal .slides section` selector; (2) theme changes verified by `#reveal-theme-link` href; (3) SlideNav buttons selected via `aria-label`; (4) chat generation tests skip when GitHub Models API unavailable; (5) editor tests verify persistence by re-reading via API after save.
 - **2026-02-10:** 7 e2e test files: CRUD, navigation, themes, code highlighting, overview mode, editor, chat generation. Script: `npm run test:e2e`.
 📌 Team update (2026-02-10): AI prompt now generates auto-animate, r-fit-text, rich fragments, code line highlighting, background gradients — new `autoAnimate` and `backgroundGradient` fields on Slide type — decided by McManus
+
+- **2026-02-10:** Added console error detection tests using `page.on('pageerror')` in `e2e/console-errors.spec.ts`. Tests verify no uncaught JS errors during presentation load, slide navigation, and r-fit-text content rendering. Catches the class of bugs like the fitty/r-fit-text `clientWidth` crash that Playwright otherwise silently ignores.
