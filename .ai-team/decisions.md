@@ -371,3 +371,195 @@ Three visual gaps identified via Playwright screenshot comparison against reveal
 **Showcase presentation updated:** Replaced the 5-slide `untitled-presentation.json` with a new version featuring a short 1-word h1 title ("TypeScript"), proper `class="language-typescript"` on code blocks for syntax highlighting, a comparison table, and a closing slide using h2. Designed to look proportional at any h1 size.
 
 **Verified:** Build passes, 50 unit tests pass, 34 Playwright e2e tests pass.
+
+---
+
+### Storage Abstraction Layer
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #40 · **Status:** Implemented
+
+Introduced `src/lib/storage.ts` — a `StorageProvider` interface that decouples API routes from the filesystem. Two implementations:
+
+**1. Interface Design**
+```typescript
+interface StorageProvider {
+  savePresentation(userId: string, slug: string, data: Presentation): Promise<void>;
+  getPresentation(userId: string, slug: string): Promise<Presentation | null>;
+  listPresentations(userId: string): Promise<PresentationSummary[]>;
+  deletePresentation(userId: string, slug: string): Promise<boolean>;
+}
+```
+All methods take `userId` as the first parameter to support multi-tenancy. `PresentationSummary` returns `{ id, title, createdAt, updatedAt, slideCount }` — same shape as the existing GET list response.
+
+**2. Implementations**
+- `LocalFileStorage`: Wraps the existing `presentations/{slug}.json` file I/O. `userId` is ignored (hardcoded to `"local"` in routes). Exact same paths and behavior as before — fully backwards compatible.
+- `BlobStorage`: Azure Blob Storage. Blobs stored at `{userId}/{slug}.json` in a `presentations` container. Uses `@azure/storage-blob` SDK. Supports `AZURE_STORAGE_CONNECTION_STRING` or `DefaultAzureCredential` via `AZURE_STORAGE_ACCOUNT_NAME`.
+
+**3. Factory Function**
+`getStorage()` returns a singleton:
+- If `AZURE_STORAGE_CONNECTION_STRING` is set → `BlobStorage`
+- Else if `AZURE_STORAGE_ACCOUNT_NAME` is set → `BlobStorage` (with `DefaultAzureCredential`)
+- Else → `LocalFileStorage`
+
+The singleton is cached in module scope. No env var? Local dev just works with no config.
+
+**4. API Route Changes**
+Both `src/app/api/presentations/route.ts` and `src/app/api/presentations/[slug]/route.ts` now call `getStorage()` instead of using `fs` directly. `generateSlug()` stays in the presentations route — it's not a storage concern. All routes pass `DEFAULT_USER = "local"` as the userId.
+
+**5. Gotchas for Team**
+- `@azure/storage-blob` and `@azure/identity` are now production dependencies.
+- `BlobStorage` dynamically imports the Azure SDKs — they won't be loaded in local dev.
+- The `deletePresentation` return value is `boolean` (true = deleted, false = not found). The route maps `false` to 404.
+- To test with Azure locally: set `AZURE_STORAGE_CONNECTION_STRING` in `.env.local`.
+- The singleton factory means the storage backend is fixed for the process lifetime. Restart the dev server after changing env vars.
+
+**Verified:** Build passes, 50 unit tests pass.
+
+---
+
+### GitHub OAuth via NextAuth.js (Auth.js v5)
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #41
+
+#### Auth Configuration
+
+- Auth.js v5 (`next-auth@5.0.0-beta.30`) with GitHub OAuth provider
+- Config in `src/auth.ts` exports `handlers`, `auth`, `signIn`, `signOut`
+- Route handler at `src/app/api/auth/[...nextauth]/route.ts`
+- JWT strategy - sessions in encrypted cookies, no database needed
+- Auth.js v5 auto-reads `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` env vars
+
+#### Session Data Shape
+
+```typescript
+session.user = {
+  id: string;        // GitHub user ID
+  name: string;      // GitHub display name
+  email: string;     // GitHub email
+  image: string;     // GitHub avatar URL
+  username: string;  // GitHub login (e.g., "spboyer")
+}
+```
+
+#### Local Dev Bypass
+
+When `AUTH_GITHUB_ID` is not set, middleware skips all auth checks.
+`UserMenu` shows "Dev Mode" badge. Detected via `data-auth-enabled` on `<html>`.
+
+#### Middleware
+
+Uses Auth.js v5 `auth()` wrapper with `req.auth`. Matcher: `/api/:path*`, `/presentation/:path*`.
+
+- **Public:** `/`, `/auth/signin`, `/api/auth/*`
+- **Protected:** `/api/presentations/*`, `/api/generate/*`, `/presentation/*`
+- API routes return 401 JSON; page routes redirect to sign-in
+
+#### Frontend
+
+- `AuthProvider.tsx` wraps `SessionProvider` from `next-auth/react`
+- `UserMenu.tsx` - avatar + sign-out / "Sign in with GitHub" / "Dev Mode"
+- Added to home page and presentation page headers
+
+#### Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `AUTH_GITHUB_ID` | No (enables OAuth) | GitHub OAuth App Client ID |
+| `AUTH_GITHUB_SECRET` | With AUTH_GITHUB_ID | OAuth App Client Secret |
+| `AUTH_SECRET` | Auto-generated in dev | Session encryption secret |
+
+#### Setup (Manual Step for Shayne)
+
+1. GitHub Settings > Developer settings > OAuth Apps > New OAuth App
+2. Application name: SlideMaker
+3. Homepage URL: `http://localhost:3000`
+4. Callback URL: `http://localhost:3000/api/auth/callback/github`
+5. Copy Client ID -> `AUTH_GITHUB_ID`, generate Client Secret -> `AUTH_GITHUB_SECRET`
+6. Add to `.env.local` (gitignored)
+
+---
+
+### CORS Middleware for API Routes
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #44 · **Status:** Implemented
+
+Added `src/middleware.ts` — Next.js middleware that adds CORS headers to all `/api/*` responses, enabling the MCP server and Copilot Extension to call the API from external processes.
+
+#### CORS Configuration
+
+| Header | Value |
+|--------|-------|
+| `Access-Control-Allow-Origin` | Per-origin (see below) |
+| `Access-Control-Allow-Methods` | `GET, POST, PUT, DELETE, OPTIONS` |
+| `Access-Control-Allow-Headers` | `Content-Type, Authorization` |
+| `Access-Control-Max-Age` | `86400` (24 hours) |
+
+**Origin resolution (`CORS_ALLOWED_ORIGINS` env var):**
+- **Development** (`NODE_ENV !== 'production'`): Always `*` — allows all origins for local dev.
+- **Production** (`NODE_ENV === 'production'`):
+  - If `CORS_ALLOWED_ORIGINS` is not set → no `Access-Control-Allow-Origin` header (deny all cross-origin requests).
+  - If set to `*` → allows all origins.
+  - If set to a comma-separated list (e.g. `https://app.example.com,https://copilot.example.com`) → only those exact origins are allowed (per-request origin matching).
+
+**Preflight:** `OPTIONS` requests return `204 No Content` with CORS headers — no body, no downstream route handler invocation.
+
+#### Extending for Auth Middleware (Issues #41, #42)
+
+The middleware structure is designed for extension. To add auth checks:
+
+1. CORS runs first (headers must be set even on auth failures for the browser to read the error).
+2. After CORS header injection, add auth logic before `NextResponse.next()`:
+
+```ts
+// After setCorsHeaders(response.headers, allowedOrigin) for non-OPTIONS:
+const authResult = validateAuth(request);
+if (!authResult.valid) {
+  const errorResponse = NextResponse.json(
+    { error: "Unauthorized" },
+    { status: 401 }
+  );
+  setCorsHeaders(errorResponse.headers, allowedOrigin);
+  return errorResponse;
+}
+return response;
+```
+
+The `setCorsHeaders` helper is already extracted as a reusable function for this purpose.
+
+#### Files Changed
+- `src/middleware.ts` (new) — middleware with `config.matcher: ["/api/:path*"]`
+
+**Verified:** Build passes, 50 unit tests pass.
+
+---
+
+### Phase 2 Test Strategy
+**Author:** Fenster (Tester) · **Date:** 2026-02-10 · **Issue:** #49 · **Status:** Proposed
+
+**Context:** Phase 2 introduces storage abstraction (#40), GitHub OAuth (#41), CORS middleware (#44), Copilot Extension, and MCP Server. Test scaffolding is needed ahead of implementation.
+
+**Decisions:**
+
+1. **Test plan expanded with 5 new sections (TC-10 through TC-14):**
+   - TC-10.x (5 cases): Storage abstraction — LocalFileStorage CRUD, factory pattern for local vs Azure Blob
+   - TC-11.x (6 cases): Auth — 401 enforcement, session access, dev bypass, bearer tokens, rate limiting
+   - TC-12.x (3 cases): CORS — preflight headers, response headers, dev mode wildcard origin
+   - TC-13.x (3 cases): Copilot Extension — skillset invocation, response format, error handling
+   - TC-14.x (4 cases): MCP Server — all four CRUD tools
+
+2. **Scaffold files created:**
+   - `src/__tests__/storage.test.ts` — Vitest `test.todo()` stubs for TC-10.x
+   - `src/__tests__/auth.test.ts` — Vitest `test.todo()` stubs for TC-11.x
+   - `e2e/cors.spec.ts` — Playwright `test.fixme()` stubs for TC-12.x (e2e because CORS requires real HTTP)
+
+3. **Priority classification:**
+   - P1: Storage (TC-10.x), core auth (TC-11.1–11.3), CORS (TC-12.x) — foundational infra
+   - P2: Bearer token auth (TC-11.4–11.6), Copilot Extension (TC-13.x), MCP Server (TC-14.x) — secondary features
+
+4. **Pattern conventions maintained:**
+   - Vitest for unit/integration tests in `src/__tests__/`
+   - Playwright for e2e tests in `e2e/`
+   - TC-{US}.{seq} naming scheme
+   - Imports from `@/lib/*` path alias
+   - `test.todo()` for vitest stubs, `test.fixme()` for Playwright stubs
+
+5. **No existing tests broken:** All 50 existing unit tests pass alongside the 11 new todo stubs.
+
+**Impact:** McManus can implement against these test contracts. When each feature merges, Fenster fills in the stubs with real assertions.
