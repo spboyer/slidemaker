@@ -12,6 +12,7 @@ import SlideEditor from "@/app/components/SlideEditor";
 import SlideManager from "@/app/components/SlideManager";
 import PresentationChat from "@/app/components/PresentationChat";
 import ThemePicker from "@/app/components/ThemePicker";
+import UserMenu from "@/app/components/UserMenu";
 
 export default function PresentationPage() {
   const params = useParams<{ slug: string }>();
@@ -367,7 +368,8 @@ export default function PresentationPage() {
             ←
           </Link>
           <span className="truncate px-2 text-xs font-medium text-white/80">{presentation.title}</span>
-          <div className="flex gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <UserMenu />
             <ThemePicker
               currentTheme={presentation.theme ?? "black"}
               onThemeChange={handleThemeChange}

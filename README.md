@@ -27,6 +27,7 @@ AI-powered slide presentation builder. Describe a topic, get a polished reveal.j
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
 | Slides | [reveal.js 5.x](https://revealjs.com) |
 | AI | [GitHub Models API](https://github.com/marketplace/models) via OpenAI SDK |
+| Auth | [Auth.js v5](https://authjs.dev) (NextAuth.js) — GitHub OAuth |
 | Testing | [Vitest](https://vitest.dev), [Playwright](https://playwright.dev) |
 
 ## Prerequisites
@@ -78,6 +79,19 @@ SlideМaker uses the **GitHub Models API** for AI slide generation. Authenticati
    ```
 
 > **⚠️ Security:** Never commit tokens or secrets to source control. The `.env.local` file is already in `.gitignore`.
+### GitHub OAuth (Optional)
+
+To enable GitHub OAuth sign-in, create a [GitHub OAuth App](https://github.com/settings/developers) and add these to `.env.local`:
+
+```
+AUTH_GITHUB_ID=your-client-id
+AUTH_GITHUB_SECRET=your-client-secret
+AUTH_SECRET=random-secret-string
+```
+
+Set the **Authorization callback URL** to `http://localhost:3000/api/auth/callback/github`.
+
+When `AUTH_GITHUB_ID` is not set, the app runs in **Dev Mode** — all routes are accessible without authentication.
 
 ## Usage
 
