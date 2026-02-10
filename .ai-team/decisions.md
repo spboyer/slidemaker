@@ -123,3 +123,44 @@ All API routes return JSON errors with appropriate HTTP status. OpenAI 429 → 4
 - API route handler functions are verified as importable and callable — full HTTP-level testing would require `next/test` or a running dev server.
 - Slug generation is tested at unit level including SEC-1 path traversal checks.
 - Build, lint, and TypeScript compilation all pass cleanly.
+
+---
+
+### No Secrets in GitHub Content
+**Author:** Shayne Boyer (via Copilot) · **Date:** 2026-02-10 · **Status:** Directive
+
+Never include secrets (tokens, API keys, credentials, passwords) in GitHub issues, PRs, commit messages, comments, or any repo content. Use environment variables or secret managers only. A leaked `gho_` OAuth token in issue #12 triggered a GitHub secret scanning alert. Preventing recurrence.
+
+---
+
+### Chat Style Values Must Match API Valid Styles
+**Author:** Keyser (Lead) · **Date:** 2025-07-23 · **Issue:** #23
+
+`PresentationChat.inferStyle()` must only return values that `/api/generate` accepts in its `VALID_STYLES` array: `"professional"`, `"creative"`, `"minimal"`, `"technical"`. The previous `"business"` value was not in the API's allow-list and caused 400 errors. If new styles are added to the API, update `inferStyle()` to match — or vice versa. A shared constant would prevent future drift.
+
+---
+
+### Switched to GitHub Models API
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #12
+
+Replaced direct OpenAI API integration with GitHub Models API. The OpenAI SDK is still used as the HTTP client, but pointed at `https://models.github.ai/inference` with a GitHub token instead of an OpenAI API key. Token resolution checks `GITHUB_TOKEN` env var first, then falls back to `gh auth token` CLI output for zero-config local development. Model names use GitHub Models convention (`openai/gpt-4o` instead of `gpt-4o`). Eliminates the need for a separate OpenAI API key.
+
+---
+
+### RevealSlideshow Integration & Keyboard Coordination
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issues:** #16, #17
+
+- `SlideViewer` is no longer used in the main presentation view — replaced by `RevealSlideshow`. `SlideViewer` remains in `SlideEditor` for the live preview panel.
+- Keyboard coordination: reveal.js uses `keyboardCondition: "focused"` (set in RevealSlideshow). SlideNav's global keydown listener skips events when the reveal container is focused. This prevents double-navigation.
+- ThemePicker uses native `<details>` element for the dropdown — no external dropdown library needed.
+- Theme changes are persisted via `PUT /api/presentations/{slug}` with `{ slides, theme }` body. The API must accept and store the `theme` field.
+- Fullscreen uses the browser Fullscreen API on the `.reveal` container element.
+
+---
+
+### RevealSlideshow CSS Loading Strategy
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issue:** #15
+
+reveal.js CSS (base `reveal.css` and theme files) cannot be imported via JS `import` in Next.js dynamic imports — they must be loaded as `<link>` tags. The `RevealSlideshow` component injects `<link>` elements into `<head>` pointing to jsDelivr CDN (`https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/...`). Theme switching swaps the `href` on the existing link. Both links are cleaned up on unmount. If the team wants to self-host these CSS files later, update the `loadRevealBaseCSS()` and `loadThemeCSS()` functions in `RevealSlideshow.tsx`.
+
+reveal.js 5.x ships no TypeScript declarations — `src/types/reveal.d.ts` provides ambient module declarations. Keep this in sync if new reveal.js APIs are used.

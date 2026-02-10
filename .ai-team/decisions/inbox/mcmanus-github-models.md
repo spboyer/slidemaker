@@ -1,4 +1,0 @@
-### 2026-02-10: Switched to GitHub Models API
-**By:** McManus
-**What:** Replaced direct OpenAI API integration with GitHub Models API. The OpenAI SDK is still used as the HTTP client, but pointed at `https://models.github.ai/inference` with a GitHub token instead of an OpenAI API key. Token resolution checks `GITHUB_TOKEN` env var first, then falls back to `gh auth token` CLI output for zero-config local development. Model names use GitHub Models convention (`openai/gpt-4o` instead of `gpt-4o`).
-**Why:** Issue #12 — eliminates the need for a separate OpenAI API key. Local devs only need `gh auth login` (which they likely already have). Deployed environments set `GITHUB_TOKEN`. The OpenAI SDK stays because it's a well-maintained HTTP client that's already compatible with the GitHub Models endpoint.

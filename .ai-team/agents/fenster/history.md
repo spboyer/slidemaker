@@ -26,3 +26,4 @@
 
 📌 Team update (2026-02-10): Editor (#3), slide management (#5), landing page (#6) complete — auto-save via PUT, side-by-side editor layout, PresentationList client component — decided by Verbal
 📌 Team update (2026-02-10): Chat sidebar (#1) and add-slide (#4) complete — PresentationChat component, SlideNav add buttons, `/presentation/new` flow — decided by Verbal
+📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
