@@ -179,6 +179,21 @@ export default function PresentationPage() {
     }
   }, []);
 
+  const handleSpeakerNotes = useCallback(() => {
+    // Open speaker notes view by dispatching 's' key to reveal.js
+    const revealEl = document.querySelector(".reveal") as HTMLElement | null;
+    if (revealEl) {
+      revealEl.focus();
+      revealEl.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "s", bubbles: true })
+      );
+    }
+  }, []);
+
+  const handlePdfExport = useCallback(() => {
+    window.open(`${window.location.pathname}?print-pdf`, "_blank");
+  }, []);
+
   const handleSaveSlide = (updated: Slide) => {
     if (!presentation) return;
     const newSlides = [...presentation.slides];
@@ -231,6 +246,7 @@ export default function PresentationPage() {
           <PresentationChat
             existingSlides={[]}
             onSlidesGenerated={handleSlidesGenerated}
+            onThemeChange={handleThemeChange}
           />
         </div>
       </div>
@@ -279,6 +295,7 @@ export default function PresentationPage() {
               existingSlides={[]}
               onSlidesGenerated={handleSlidesGenerated}
               presentationTitle={presentation.title}
+              onThemeChange={handleThemeChange}
             />
           </div>
         )}
@@ -403,6 +420,10 @@ export default function PresentationPage() {
           onNext={() => revealRef.current?.next()}
           onAddSlide={handleAddSlide}
           onAddBlank={handleAddBlank}
+          onSpeakerNotes={handleSpeakerNotes}
+          onFullscreen={handleFullscreen}
+          onOverview={() => revealRef.current?.toggleOverview()}
+          onPdfExport={handlePdfExport}
         />
       </div>
 
@@ -413,6 +434,7 @@ export default function PresentationPage() {
             existingSlides={slides}
             onSlidesGenerated={handleSlidesGenerated}
             presentationTitle={presentation.title}
+            onThemeChange={handleThemeChange}
           />
         </div>
       )}
