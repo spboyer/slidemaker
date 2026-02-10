@@ -27,7 +27,7 @@ AI-powered slide presentation builder. Describe a topic, get a polished reveal.j
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
 | Slides | [reveal.js 5.x](https://revealjs.com) |
 | AI | [GitHub Models API](https://github.com/marketplace/models) via OpenAI SDK |
-| Testing | [Vitest](https://vitest.dev) |
+| Testing | [Vitest](https://vitest.dev), [Playwright](https://playwright.dev) |
 
 ## Prerequisites
 
@@ -185,8 +185,11 @@ Delete a presentation.
 # Development server (with hot reload)
 npm run dev
 
-# Run tests
+# Run unit tests
 npm test
+
+# Run e2e tests (starts dev server automatically)
+npm run test:e2e
 
 # Production build
 npm run build
@@ -197,6 +200,35 @@ npm start
 # Lint
 npm run lint
 ```
+
+### E2E Testing
+
+End-to-end tests use [Playwright](https://playwright.dev) with Chromium. They cover presentation CRUD, slide navigation, theme switching, code highlighting, overview mode, the slide editor, and AI chat generation.
+
+**Setup:**
+
+```bash
+# Install Playwright browsers (first time only)
+npx playwright install chromium
+```
+
+**Running:**
+
+```bash
+# Run all e2e tests (starts dev server automatically)
+npm run test:e2e
+
+# Run a specific test file
+npx playwright test e2e/slide-navigation.spec.ts
+
+# Run in headed mode (see the browser)
+npx playwright test --headed
+
+# View the HTML report after a test run
+npx playwright show-report
+```
+
+> **Note:** Tests that require the GitHub Models API (chat generation) are automatically skipped when the API is unavailable.
 
 ## Project Structure
 

@@ -28,3 +28,8 @@
 📌 Team update (2026-02-10): Chat sidebar (#1) and add-slide (#4) complete — PresentationChat component, SlideNav add buttons, `/presentation/new` flow — decided by Verbal
 📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
 📌 Team update (2026-02-10): Always update docs, tests, and agents.md when making changes — directive by Shayne Boyer
+
+- **2026-02-10:** Playwright e2e test suite added (#37). Config: `playwright.config.ts` at repo root, Chromium-only for speed, `webServer` auto-starts `npm run dev` on port 3000, screenshots on failure, HTML reporter, 30s timeout.
+- **2026-02-10:** Test fixture strategy: `e2e/helpers.ts` creates/deletes presentation JSON files directly in `presentations/` directory. Avoids dependency on the AI generation API for most tests. Uses `beforeAll`/`afterAll` for setup/teardown.
+- **2026-02-10:** Key test patterns: (1) reveal.js readiness via `.reveal .slides section` selector; (2) theme changes verified by `#reveal-theme-link` href; (3) SlideNav buttons selected via `aria-label`; (4) chat generation tests skip when GitHub Models API unavailable; (5) editor tests verify persistence by re-reading via API after save.
+- **2026-02-10:** 7 e2e test files: CRUD, navigation, themes, code highlighting, overview mode, editor, chat generation. Script: `npm run test:e2e`.
