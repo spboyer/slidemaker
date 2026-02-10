@@ -32,12 +32,19 @@ interface RevealSlideshowProps {
   onSlideChange?: (index: number) => void;
 }
 
+/** Remove r-fit-text class to prevent fitty crash in React reconciliation */
+function stripFitText(html: string): string {
+  return html
+    .replace(/\bclass="r-fit-text"/gi, '')
+    .replace(/\br-fit-text\b/g, '');
+}
+
 /** Render slide content — supports HTML (contains tags) or plain markdown */
 function SlideContent({ slide }: { slide: Slide }) {
   const isHTML = /<[a-z][\s\S]*>/i.test(slide.content);
 
   if (isHTML) {
-    return <div dangerouslySetInnerHTML={{ __html: slide.content }} />;
+    return <div dangerouslySetInnerHTML={{ __html: stripFitText(slide.content) }} />;
   }
 
   // Plain text / markdown: render as paragraphs split by double newlines
