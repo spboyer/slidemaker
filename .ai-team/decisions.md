@@ -181,29 +181,6 @@ Replaced the default create-next-app boilerplate README with comprehensive Slide
 
 ---
 
-### AI Prompt Upgrade for High-Fidelity reveal.js Slides
-**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #36 · **PR:** #39
-
-The SYSTEM_PROMPT in `src/app/api/generate/route.ts` now instructs the AI to use rich reveal.js features:
-- **Auto-animate** (`autoAnimate: true` on Slide) — morphing transitions between consecutive slides
-- **r-fit-text** — auto-sizing text on title/impact slides
-- **Rich fragments** — 10 types (fade-up, grow, shrink, highlight-red, etc.) instead of basic `fragment`
-- **Code blocks with line highlighting** — `data-line-numbers="1|3-5|8"` for step-through
-- **Background gradients** — `backgroundGradient` field for CSS gradients on slides
-- **Styled tables and blockquotes** — with fragment rows and attribution
-
-Two new optional fields added to the `Slide` type (`src/lib/types.ts`):
-- `autoAnimate?: boolean`
-- `backgroundGradient?: string`
-
-`RevealSlideshow.tsx` updated to render these as `data-auto-animate` and `data-background-gradient` section attributes.
-
-STYLE_INSTRUCTIONS expanded with per-style feature guidance (professional: no flashy animations; creative: bold gradients + auto-animate; minimal: r-fit-text + fade only; technical: code blocks + dark themes).
-
-**Backward compatible** — all new fields are optional. Existing presentations render unchanged.
-
----
-
 ### Playwright E2E Test Setup
 **Author:** Fenster (Tester) · **Date:** 2026-02-10 · **Issue:** #37 · **PR:** #38
 
@@ -215,3 +192,87 @@ STYLE_INSTRUCTIONS expanded with per-style feature guidance (professional: no fl
 6. **reveal.js readiness**: Tests wait for `.reveal .slides section` to appear before interacting. `waitForReveal()` helper in `e2e/helpers.ts` handles this with a 15s timeout.
 
 **Impact:** `npm run test:e2e` runs the full Playwright suite. `e2e/helpers.ts` is the shared fixture module. Tests needing the AI API should follow the skip pattern in `chat-generation.spec.ts`. Playwright artifacts are gitignored.
+
+---
+
+### Console Error Detection Playwright Tests
+**Author:** Fenster (Tester) · **Date:** 2026-02-10
+
+New `e2e/console-errors.spec.ts` catches uncaught browser JS errors during presentation load, navigation, and r-fit-text content rendering. Uses `page.on('pageerror')` to detect errors that Playwright tests otherwise silently ignore — prevents regressions like the fitty rAF crash.
+
+---
+
+### Slide Quality Audit — Gap Analysis
+**Author:** Keyser (Lead) · **Date:** 2026-02-10
+
+Comprehensive audit of the gap between generated slides and the revealjs.com demo quality bar. Key findings:
+
+1. **P0 — `all: revert` CSS is the #1 problem.** Applied to 30+ elements in `.reveal .slides`, it reverts ALL properties to browser defaults, destroying reveal.js theme styles (fonts, colors, heading sizes, letter-spacing, text-transforms), fragment animations, and code block styling. All 11 themes are broken equally. Fix: replace with targeted property-level reverts for only the properties Tailwind v4 resets.
+
+2. **P1 — Prompt improvements needed.** Missing `data-id` for auto-animate, no `r-stack`/`r-hstack` layouts, light backgrounds on dark themes, no code blocks for technical topics, underwhelming title slides.
+
+3. **P1 — CSS replacement for `r-fit-text`.** Use `font-size: clamp()` or similar to restore dramatic title slide sizing without the fitty library crash.
+
+4. **P2 — Background images already in data model but not prompted.** P3 — vertical slides and background video are nice-to-haves.
+
+**Execution order:** Verbal fixes CSS (P0) → Verbal adds r-fit-text CSS replacement (P1) → McManus upgrades prompt (P1) → McManus adds background image instructions (P2).
+
+---
+
+### SYSTEM_PROMPT V2: Conference-Quality Slide Generation
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Status:** Implemented
+
+Complete rewrite of the SYSTEM_PROMPT in `src/app/api/generate/route.ts` to produce slides matching revealjs.com demo quality:
+
+1. **Slide Type Taxonomy** — 8 defined types (Cover, Section Divider, Content, Code, Comparison, Quote, Impact, Closing) with specific HTML rules per type. Every deck must start with Cover and end with Closing.
+2. **Typography Rules** — h1 only on cover slide, short punchy text (3-7 word titles, 3-4 lines max), no h1 elsewhere.
+3. **Strict HTML Quality Rules** — Max 5 bullets, no nested lists, no r-fit-text, no nested sections, code blocks require data-trim data-noescape, ~60% fragment usage not 100%.
+4. **Background Design System** — Cover requires dark gradient, section dividers require contrasting backgrounds, 40%+ slides with custom backgrounds, defined complementary color palettes.
+5. **Speaker Notes Quality** — Timing cues, engagement prompts, transition hints.
+6. **Theme Intelligence** — Topic-aware: technical→night/black/moon, business→white/simple/serif, creative→league/sky/solarized. NEVER suggest "beige".
+7. **Upgraded Example** — 3-slide deck fragment (cover + auto-animate impact pair).
+
+All new Slide fields remain optional — backward compatible. Build passes, 50 unit tests pass.
+
+---
+
+### Remove r-fit-text from AI Generation Prompt
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10
+
+Removed r-fit-text instructions from SYSTEM_PROMPT — AI no longer generates slides with the `r-fit-text` class. The fitty library used by reveal.js for r-fit-text causes uncaught TypeError crashes in React due to stale DOM references in rAF loops. Verbal also strips r-fit-text on the rendering side.
+
+---
+
+### Tailwind v4 / reveal.js CSS Isolation Strategy (Updated)
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issues:** #32, #33, #34
+
+Original approach used `all: revert` on all content elements scoped to `.reveal .slides`. This was replaced with targeted property-level reverts (see "CSS Scoping: Replace `all: revert`" decision below) after Keyser's audit revealed it was destroying theme styles.
+
+Plugin loading convention and overview mode fix remain unchanged:
+- Plugins (Highlight, Notes, Zoom) dynamically imported alongside reveal.js.
+- highlight.js Monokai CSS loaded via CDN `<link>` tag with cleanup on unmount.
+- `overviewhidden` event syncs `currentSlideIndex` when leaving overview mode.
+
+---
+
+### CSS Scoping: Replace `all: revert` with Targeted Property Reverts
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+
+Replaced the nuclear `all: revert` rule (applied to 30+ elements inside `.reveal .slides`) with targeted `revert` on only the specific properties Tailwind v4's base layer resets:
+- `margin`, `padding` (headings, paragraphs, lists, blockquotes, tables, figures)
+- `font-size`, `font-weight` (headings)
+- `font-family`, `font-size` (pre, code)
+- `list-style`, `padding`, `margin` (ul, ol)
+- `border`, `padding`, `text-align` (table, th, td)
+- `color`, `text-decoration` (links)
+- `font-weight` on strong/b, `font-style` on em/i
+- `opacity`, `transform`, `visibility`, `transition` (on `.fragment`)
+
+Also added r-fit-text compensation CSS (standalone title headings render at 2.5–3em) and fragment animation preservation. All 11 themes now render correctly. Build passes, 50 unit tests pass.
+
+---
+
+### Strip r-fit-text from Slide Content in RevealSlideshow
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+
+The `r-fit-text` CSS class is stripped from slide HTML content before rendering via `stripFitText()` in `RevealSlideshow.tsx`. This prevents fitty's `requestAnimationFrame` loop from crashing when React reconciliation detaches DOM nodes that fitty still holds references to.

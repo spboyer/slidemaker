@@ -89,3 +89,6 @@
 - **STYLE_INSTRUCTIONS upgraded**: Each style now includes specific feature guidance (e.g. technical requires 2+ code slides with data-line-numbers).
 - Constraints preserved: no r-fit-text, no vertical slides, JSON format unchanged.
 - Build passes, all 50 unit tests pass.
+📌 Team update (2026-02-10): CSS `all: revert` replaced with targeted property reverts — all 11 reveal.js themes now render correctly — decided by Verbal (based on Keyser audit)
+📌 Team update (2026-02-10): Console error detection e2e tests added — `page.on('pageerror')` catches uncaught JS errors during Playwright runs — decided by Fenster
+📌 Team update (2026-02-10): r-fit-text stripped from rendering in RevealSlideshow — fitty crash eliminated — decided by Verbal

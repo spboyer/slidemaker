@@ -36,3 +36,6 @@
 📌 Team update (2026-02-10): AI prompt now generates auto-animate, r-fit-text, rich fragments, code line highlighting, background gradients — new `autoAnimate` and `backgroundGradient` fields on Slide type — decided by McManus
 
 - **2026-02-10:** Added console error detection tests using `page.on('pageerror')` in `e2e/console-errors.spec.ts`. Tests verify no uncaught JS errors during presentation load, slide navigation, and r-fit-text content rendering. Catches the class of bugs like the fitty/r-fit-text `clientWidth` crash that Playwright otherwise silently ignores.
+📌 Team update (2026-02-10): CSS `all: revert` replaced with targeted property reverts — all 11 reveal.js themes now render correctly — decided by Verbal (based on Keyser audit)
+📌 Team update (2026-02-10): SYSTEM_PROMPT V2 deployed — 8-type slide taxonomy, strict HTML rules, curated backgrounds, theme intelligence — decided by McManus
+📌 Team update (2026-02-10): r-fit-text removed from AI prompt and stripped from rendering — fitty crash eliminated — decided by McManus & Verbal

@@ -23,3 +23,6 @@
 📌 Team update (2026-02-10): Test plan with 40+ cases ready — smoke tests can run once APIs are exercised — decided by Fenster
 📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
 📌 Team update (2026-02-10): Always update docs, tests, and agents.md when making changes — directive by Shayne Boyer
+📌 Team update (2026-02-10): CSS `all: revert` replaced with targeted property reverts — all 11 reveal.js themes now render correctly with intended fonts, colors, and styling — decided by Verbal (based on Keyser audit)
+📌 Team update (2026-02-10): SYSTEM_PROMPT V2 deployed — 8-type slide taxonomy, strict HTML rules, curated backgrounds, theme intelligence — decided by McManus
+📌 Team update (2026-02-10): Console error detection e2e tests added — `page.on('pageerror')` catches uncaught JS errors during Playwright runs — decided by Fenster
