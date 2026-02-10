@@ -97,8 +97,18 @@ export default function PresentationPage() {
   const handleSlidesGenerated = useCallback(
     async (newSlides: Slide[]) => {
       if (isNew && !presentation) {
-        // New presentation — create it with the first slide's content as topic
-        const title = newSlides[0]?.title || "Untitled Presentation";
+        // Derive title from cover slide <h1> content, or first non-empty slide title
+        let title = "Untitled Presentation";
+        const coverContent = newSlides[0]?.content ?? "";
+        const h1Match = coverContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+        if (h1Match?.[1]) {
+          // Strip any inner HTML tags from the h1 text
+          title = h1Match[1].replace(/<[^>]*>/g, "").trim() || title;
+        } else {
+          // Fallback: use first slide with a non-empty title
+          const titled = newSlides.find((s) => s.title?.trim());
+          if (titled) title = titled.title!;
+        }
         await createPresentation(newSlides, title);
       } else if (presentation) {
         // Existing presentation — append slides and save
