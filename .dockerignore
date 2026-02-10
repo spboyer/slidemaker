@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+screenshots
+playwright-report
+test-results
+coverage
+e2e
+.env*
+.ai-team
+.ai-team-templates

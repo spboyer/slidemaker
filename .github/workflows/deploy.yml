@@ -1,0 +1,71 @@
+name: Build and Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: slidemaker-rg
+  BICEP_FILE: infra/main.bicep
+  BICEP_PARAMS: infra/main.bicepparam
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      acr-login-server: ${{ steps.infra.outputs.acrLoginServer }}
+      container-app-name: ${{ steps.infra.outputs.containerAppName }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Infrastructure
+        id: infra
+        uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ${{ env.BICEP_FILE }}
+          parameters: ${{ env.BICEP_PARAMS }}
+
+      - name: ACR Login
+        run: az acr login --name ${{ steps.infra.outputs.acrName }}
+
+      - name: Build and push image
+        id: meta
+        run: |
+          IMAGE="${{ steps.infra.outputs.acrLoginServer }}/slidemaker:${{ github.sha }}"
+          docker build -t $IMAGE -t ${{ steps.infra.outputs.acrLoginServer }}/slidemaker:latest .
+          docker push $IMAGE
+          docker push ${{ steps.infra.outputs.acrLoginServer }}/slidemaker:latest
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Container Apps
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: ${{ needs.build-and-push.outputs.container-app-name }}
+          imageToDeploy: ${{ needs.build-and-push.outputs.image }}
