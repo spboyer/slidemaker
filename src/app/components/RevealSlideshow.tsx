@@ -276,9 +276,9 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         }
         setReady(false);
       };
-      // Re-init when slides change structurally
+      // Re-init when the presentation ID changes (different presentation)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [presentation.id, presentation.slides.length]);
+    }, [presentation.id]);
 
     // Re-highlight code blocks after React re-render.
     // The RevealHighlight plugin processes <pre><code> during deck.initialize(),
@@ -288,20 +288,27 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
     useEffect(() => {
       if (!ready || !deckRef.current || !containerRef.current) return;
 
+      const deck = deckRef.current;
+      const container = containerRef.current;
+
       // Initial highlight pass
-      highlightCodeBlocks(deckRef.current, containerRef.current);
+      highlightCodeBlocks(deck, container);
 
       // Watch for DOM mutations that reset code blocks (React reconciliation)
       const observer = new MutationObserver(() => {
-        if (deckRef.current && containerRef.current) {
-          const unprocessed = containerRef.current.querySelectorAll('pre code:not([data-highlighted])');
+        // Guard: only highlight if the deck is still the current one and ready
+        if (deckRef.current !== deck || !containerRef.current) return;
+        try {
+          const unprocessed = container.querySelectorAll('pre code:not([data-highlighted])');
           if (unprocessed.length > 0) {
-            highlightCodeBlocks(deckRef.current, containerRef.current);
+            highlightCodeBlocks(deck, container);
           }
+        } catch {
+          // Deck may be mid-destroy during slide count changes
         }
       });
 
-      observer.observe(containerRef.current, {
+      observer.observe(container, {
         childList: true,
         subtree: true,
       });

@@ -1,55 +1,47 @@
 {
   "id": "untitled-presentation",
   "title": "Untitled Presentation",
-  "createdAt": "2026-02-10T22:35:19.096Z",
-  "updatedAt": "2026-02-10T22:35:19.096Z",
+  "createdAt": "2026-02-10T23:03:23.135Z",
+  "updatedAt": "2026-02-10T23:03:23.135Z",
   "slides": [
     {
       "title": "",
-      "content": "<h1>TypeScript Best Practices</h1><p>Writing clean, scalable, and maintainable code</p>",
-      "notes": "Welcome the audience to the session. Spend a minute introducing the topic. Mention that this talk will focus on practical tips to improve TypeScript usage and ensure code quality. Ask: 'How many of you are currently using TypeScript in your projects?'",
+      "content": "<h1>TypeScript Basics</h1><p>Strongly typed JavaScript for scalable applications</p>",
+      "notes": "Introduce the topic of TypeScript. Mention that this talk is aimed at developers who are familiar with JavaScript but new to TypeScript. Briefly outline the goals: understanding what TypeScript is, its key benefits, and some basic syntax. Spend 1 minute here.",
       "transition": "fade",
       "backgroundGradient": "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)",
       "layout": "center"
     },
     {
       "title": "",
-      "content": "<h2>Why TypeScript?</h2><p>Adding type safety for robust JavaScript development</p>",
-      "notes": "Spend ~2 minutes here. Highlight why TypeScript has become the go-to choice for modern JavaScript projects. Discuss the importance of type safety in catching errors early and improving collaboration in teams. Transition: 'Now, let’s dive into some best practices for using TypeScript effectively.'",
+      "content": "<h2>Why TypeScript?</h2><p>Supercharging JavaScript development</p>",
+      "notes": "Explain why TypeScript matters. Spend 2 minutes discussing how it helps with scalability, maintainability, and catching bugs early. Ask the audience: 'How many of you have experienced runtime errors that could have been avoided with better tooling?' Transition to the next section explaining TypeScript’s core features.",
       "transition": "convex",
       "backgroundGradient": "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
       "layout": "center"
     },
     {
-      "title": "Embrace Strict Mode",
-      "content": "<ul><li class=\"fragment fade-up\">Enable <code>strict</code> mode in your <code>tsconfig.json</code></li><li class=\"fragment fade-up\">Catch potential bugs early with stricter type checks</li><li class=\"fragment fade-up\">Recommended flags: <code>noImplicitAny</code>, <code>strictNullChecks</code>, <code>strictPropertyInitialization</code></li></ul>",
-      "notes": "Spend 3 minutes. Explain how enabling strict mode helps identify potential issues early in the development cycle. Walk through the key flags like noImplicitAny, strictNullChecks, and strictPropertyInitialization. Ask if anyone has stories about bugs caught by these settings.",
-      "transition": "fade",
-      "backgroundColor": "#1a1a3e",
-      "layout": "default"
-    },
-    {
-      "title": "Prefer Type Aliases over Interfaces",
-      "content": "<ul><li class=\"fragment grow\">Type aliases are more versatile</li><li class=\"fragment grow\">Support for unions and intersections</li><li class=\"fragment grow\">Interfaces are still great for OOP-style programming</li></ul>",
-      "notes": "Spend ~2 minutes. Discuss the flexibility of type aliases in handling complex types like unions and intersections. However, mention that interfaces are still useful for specific use cases, particularly in object-oriented programming scenarios.",
+      "title": "Core Features",
+      "content": "<ul><li class=\"fragment fade-up\">✅ Static typing for better code reliability</li><li class=\"fragment fade-up\">💡 IntelliSense support in editors</li><li class=\"fragment fade-up\">📦 Seamless integration with JavaScript</li><li class=\"fragment fade-up\">🔄 Type inference for flexibility</li></ul>",
+      "notes": "Spend ~30 seconds per bullet. Mention how static typing helps developers catch errors during development. Highlight IntelliSense as a key productivity booster. Discuss the seamless compatibility with JavaScript, making it easy to adopt. Wrap up with type inference, emphasizing how TypeScript balances strict typing with ease of use.",
       "transition": "slide",
-      "backgroundColor": "#16213e",
+      "backgroundColor": "#161b33",
       "layout": "default"
     },
     {
-      "title": "Use Utility Types",
-      "content": "<pre><code data-trim data-noescape data-line-numbers=\"1-2|3-4|5-6\" class=\"language-typescript\">interface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\n// Partial: All properties optional\nconst partialUser: Partial<User> = { name: \"John\" };\n\n// Readonly: Prevent mutations\nconst readonlyUser: Readonly<User> = { id: 1, name: \"Alice\", email: \"alice@example.com\" };</code></pre>",
-      "notes": "Spend ~3 minutes. Explain how utility types like Partial and Readonly simplify common scenarios, reducing boilerplate code. Walk through the examples and show how these types make code cleaner and less error-prone.",
-      "transition": "none",
-      "backgroundColor": "#0f3460",
+      "title": "Basic Syntax",
+      "content": "<pre><code class=\"language-typescript\" data-trim data-noescape data-line-numbers=\"1-3|4-5\">// Type annotations\nlet message: string = 'Hello, TypeScript';\n\n// Functions with types\nfunction add(a: number, b: number): number {\n  return a + b;\n}\n\n// Interface example\ninterface User {\n  id: number;\n  name: string;\n}</code></pre>",
+      "notes": "Walk through this code example with the audience. Spend ~2 minutes explaining each section: (1) Variable type annotations, (2) Function parameter and return types, (3) Interfaces for defining object shapes. Pause for questions after explaining interfaces. Transition: 'Now that we’ve seen the basics, let’s look at how TypeScript fits into larger projects.'",
+      "transition": "zoom",
+      "backgroundColor": "#0c0c1d",
       "layout": "default"
     },
     {
       "title": "",
-      "content": "<h2>Good TypeScript = Better JavaScript ✅</h2>",
-      "notes": "Emphasize the importance of following best practices to leverage the full power of TypeScript. Encourage the audience to explore these tips in their projects and experiment with adding more type safety to their codebase. Transition: 'Let’s wrap up with the key takeaways.'",
-      "transition": "zoom",
-      "backgroundGradient": "linear-gradient(135deg, #2D1B69 0%, #8B2252 50%, #E84545 100%)",
+      "content": "<h2>TypeScript: Build with Confidence</h2><ul><li class=\"fragment fade-up\">💡 Catch bugs at compile-time</li><li class=\"fragment fade-up\">📊 Strong typing for scalability</li><li class=\"fragment fade-up\">🚀 Empower developers with better tooling</li></ul>",
+      "notes": "Wrap up the presentation with key takeaways. Spend ~1 minute per bullet. Reiterate the importance of catching bugs before they hit production. Highlight how strong typing makes large-scale projects manageable. End with the point about empowering developers with better tooling. Call to action: 'Start exploring TypeScript in your next project!'",
+      "transition": "concave",
+      "backgroundGradient": "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
       "layout": "center"
     }
   ]

@@ -95,15 +95,15 @@ export default function PresentationPage() {
   );
 
   const handleSlidesGenerated = useCallback(
-    (newSlides: Slide[]) => {
+    async (newSlides: Slide[]) => {
       if (isNew && !presentation) {
         // New presentation — create it with the first slide's content as topic
         const title = newSlides[0]?.title || "Untitled Presentation";
-        createPresentation(newSlides, title);
+        await createPresentation(newSlides, title);
       } else if (presentation) {
         // Existing presentation — append slides and save
         const combined = [...presentation.slides, ...newSlides];
-        savePresentation(combined);
+        await savePresentation(combined);
         setCurrentSlideIndex(presentation.slides.length); // jump to first new slide
       }
     },
@@ -136,11 +136,11 @@ export default function PresentationPage() {
     }
   }, [presentation, addingSlide, savePresentation]);
 
-  const handleAddBlank = useCallback(() => {
+  const handleAddBlank = useCallback(async () => {
     if (!presentation) return;
     const blank: Slide = { title: "New Slide", content: "" };
     const newSlides = [...presentation.slides, blank];
-    savePresentation(newSlides);
+    await savePresentation(newSlides);
     setCurrentSlideIndex(newSlides.length - 1);
     setEditing(true);
   }, [presentation, savePresentation]);
