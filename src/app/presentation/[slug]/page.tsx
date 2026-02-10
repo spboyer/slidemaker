@@ -8,18 +8,22 @@ import SlideViewer from "@/app/components/SlideViewer";
 import SlideNav from "@/app/components/SlideNav";
 import SlideEditor from "@/app/components/SlideEditor";
 import SlideManager from "@/app/components/SlideManager";
+import PresentationChat from "@/app/components/PresentationChat";
 
 export default function PresentationPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const slug = params.slug;
+  const isNew = slug === "new";
 
   const [presentation, setPresentation] = useState<Presentation | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isNew);
   const [notFound, setNotFound] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [editing, setEditing] = useState(false);
   const [showManager, setShowManager] = useState(false);
+  const [showChat, setShowChat] = useState(isNew);
+  const [addingSlide, setAddingSlide] = useState(false);
 
   const fetchPresentation = useCallback(async () => {
     try {
@@ -40,16 +44,9 @@ export default function PresentationPage() {
   }, [slug]);
 
   useEffect(() => {
-    if (slug === "new") return;
+    if (isNew) return;
     fetchPresentation();
-  }, [slug, fetchPresentation]);
-
-  // Redirect /presentation/new to home for now (creation flow handled elsewhere)
-  useEffect(() => {
-    if (slug === "new") {
-      router.push("/");
-    }
-  }, [slug, router]);
+  }, [isNew, fetchPresentation]);
 
   const savePresentation = useCallback(
     async (slides: Slide[], title?: string) => {
@@ -57,7 +54,7 @@ export default function PresentationPage() {
       const body: { slides: Slide[]; title?: string } = { slides };
       if (title) body.title = title;
       try {
-        const res = await fetch(`/api/presentations/${slug}`, {
+        const res = await fetch(`/api/presentations/${presentation.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -70,8 +67,79 @@ export default function PresentationPage() {
         console.error("Failed to save presentation:", err);
       }
     },
-    [presentation, slug]
+    [presentation]
   );
+
+  const createPresentation = useCallback(
+    async (slides: Slide[], title: string) => {
+      try {
+        const res = await fetch("/api/presentations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, slides }),
+        });
+        if (res.ok) {
+          const created: Presentation = await res.json();
+          setPresentation(created);
+          router.replace(`/presentation/${created.id}`);
+        }
+      } catch (err) {
+        console.error("Failed to create presentation:", err);
+      }
+    },
+    [router]
+  );
+
+  const handleSlidesGenerated = useCallback(
+    (newSlides: Slide[]) => {
+      if (isNew && !presentation) {
+        // New presentation — create it with the first slide's content as topic
+        const title = newSlides[0]?.title || "Untitled Presentation";
+        createPresentation(newSlides, title);
+      } else if (presentation) {
+        // Existing presentation — append slides and save
+        const combined = [...presentation.slides, ...newSlides];
+        savePresentation(combined);
+        setCurrentSlideIndex(presentation.slides.length); // jump to first new slide
+      }
+    },
+    [isNew, presentation, createPresentation, savePresentation]
+  );
+
+  const handleAddSlide = useCallback(async () => {
+    if (!presentation || addingSlide) return;
+    setAddingSlide(true);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: presentation.title,
+          numSlides: 1,
+          existingSlides: presentation.slides,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const newSlides = [...presentation.slides, ...data.slides];
+        await savePresentation(newSlides);
+        setCurrentSlideIndex(newSlides.length - 1);
+      }
+    } catch (err) {
+      console.error("Failed to add slide:", err);
+    } finally {
+      setAddingSlide(false);
+    }
+  }, [presentation, addingSlide, savePresentation]);
+
+  const handleAddBlank = useCallback(() => {
+    if (!presentation) return;
+    const blank: Slide = { title: "New Slide", content: "" };
+    const newSlides = [...presentation.slides, blank];
+    savePresentation(newSlides);
+    setCurrentSlideIndex(newSlides.length - 1);
+    setEditing(true);
+  }, [presentation, savePresentation]);
 
   const handleSaveSlide = (updated: Slide) => {
     if (!presentation) return;
@@ -108,6 +176,29 @@ export default function PresentationPage() {
     else if (currentSlideIndex === index + 1) setCurrentSlideIndex(index);
   };
 
+  // --- New presentation (no slides yet) ---
+  if (isNew && !presentation) {
+    return (
+      <div className="flex h-screen w-screen bg-slate-900">
+        {/* Chat sidebar open by default for new */}
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <h1 className="text-3xl font-bold text-white">New Presentation</h1>
+            <p className="text-white/50">
+              Use the chat to describe your topic and generate slides.
+            </p>
+          </div>
+        </div>
+        <div className="w-80 shrink-0 border-l border-white/10">
+          <PresentationChat
+            existingSlides={[]}
+            onSlidesGenerated={handleSlidesGenerated}
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-slate-900">
@@ -134,14 +225,25 @@ export default function PresentationPage() {
 
   if (slides.length === 0) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-slate-900">
-        <p className="text-xl text-white/60">No slides to display</p>
-        <Link
-          href="/"
-          className="text-sm text-indigo-400 hover:text-indigo-300"
-        >
-          ← Back to presentations
-        </Link>
+      <div className="flex h-screen w-screen bg-slate-900">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <p className="text-xl text-white/60">No slides to display</p>
+          <Link
+            href="/"
+            className="text-sm text-indigo-400 hover:text-indigo-300"
+          >
+            ← Back to presentations
+          </Link>
+        </div>
+        {showChat && (
+          <div className="w-80 shrink-0 border-l border-white/10">
+            <PresentationChat
+              existingSlides={[]}
+              onSlidesGenerated={handleSlidesGenerated}
+              presentationTitle={presentation.title}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -199,6 +301,14 @@ export default function PresentationPage() {
           <span className="text-sm font-medium text-white">{presentation.title}</span>
           <div className="flex gap-2">
             <button
+              onClick={() => setShowChat(!showChat)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium text-white transition-colors ${
+                showChat ? "bg-indigo-600 hover:bg-indigo-500" : "bg-white/10 hover:bg-white/20"
+              }`}
+            >
+              {showChat ? "Hide Chat" : "AI Chat"}
+            </button>
+            <button
               onClick={() => setShowManager(!showManager)}
               className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20"
             >
@@ -224,8 +334,21 @@ export default function PresentationPage() {
           totalSlides={slides.length}
           onPrevious={() => setCurrentSlideIndex((i) => Math.max(0, i - 1))}
           onNext={() => setCurrentSlideIndex((i) => Math.min(slides.length - 1, i + 1))}
+          onAddSlide={handleAddSlide}
+          onAddBlank={handleAddBlank}
         />
       </div>
+
+      {/* Chat sidebar */}
+      {showChat && (
+        <div className="w-80 shrink-0 border-l border-white/10">
+          <PresentationChat
+            existingSlides={slides}
+            onSlidesGenerated={handleSlidesGenerated}
+            presentationTitle={presentation.title}
+          />
+        </div>
+      )}
     </div>
   );
 }

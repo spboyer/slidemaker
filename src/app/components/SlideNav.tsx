@@ -7,6 +7,8 @@ interface SlideNavProps {
   totalSlides: number;
   onPrevious: () => void;
   onNext: () => void;
+  onAddSlide?: () => void;
+  onAddBlank?: () => void;
 }
 
 export default function SlideNav({
@@ -14,6 +16,8 @@ export default function SlideNav({
   totalSlides,
   onPrevious,
   onNext,
+  onAddSlide,
+  onAddBlank,
 }: SlideNavProps) {
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalSlides - 1;
@@ -46,14 +50,32 @@ export default function SlideNav({
         {currentIndex + 1} / {totalSlides}
       </span>
 
-      <button
-        onClick={onNext}
-        disabled={isLast}
-        aria-label="Next slide"
-        className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        Next →
-      </button>
+      <div className="flex items-center gap-2">
+        {onAddSlide && (
+          <button
+            onClick={onAddSlide}
+            className="rounded-lg bg-indigo-600/80 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
+          >
+            + AI Slide
+          </button>
+        )}
+        {onAddBlank && (
+          <button
+            onClick={onAddBlank}
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          >
+            + Blank
+          </button>
+        )}
+        <button
+          onClick={onNext}
+          disabled={isLast}
+          aria-label="Next slide"
+          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next →
+        </button>
+      </div>
     </nav>
   );
 }
