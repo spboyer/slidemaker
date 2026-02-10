@@ -196,6 +196,14 @@ body {
   color: var(--r-link-color, #42affa);
 }
 
+/* Cap h1 size to prevent multi-word titles from overwhelming the slide.
+   The black theme sets --r-heading1-size: 2.5em which at 42px base = 105px.
+   That's fine for short titles but breaks with 3+ word titles.
+   min() caps it at 2em (84px at 42px base) — proportional like the revealjs.com demo. */
+.reveal .slides section h1 {
+  font-size: min(var(--r-heading1-size, 2.5em), 2em);
+}
+
 /* Ensure overview mode pointer events are not blocked */
 .reveal.overview .slides section {
   cursor: pointer;
