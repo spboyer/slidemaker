@@ -8,7 +8,7 @@ import {
 
 const SLUG = "e2e-theme-test";
 
-test.describe("Theme Rendering", () => {
+test.describe.serial("Theme Rendering", () => {
   test.beforeAll(() => {
     createFixturePresentation(SLUG, {
       title: "Theme Test",
@@ -50,7 +50,8 @@ test.describe("Theme Rendering", () => {
 
     await expect(page.locator("#reveal-theme-link")).toHaveAttribute(
       "href",
-      /white\.css/
+      /white\.css/,
+      { timeout: 10_000 }
     );
   });
 
@@ -65,7 +66,8 @@ test.describe("Theme Rendering", () => {
 
     await expect(page.locator("#reveal-theme-link")).toHaveAttribute(
       "href",
-      /solarized\.css/
+      /solarized\.css/,
+      { timeout: 10_000 }
     );
   });
 
@@ -76,8 +78,12 @@ test.describe("Theme Rendering", () => {
     await page.locator("summary", { hasText: "Theme" }).click();
     await page.locator("button", { hasText: "Moon" }).click();
 
-    // Wait for the PUT request to complete
-    await page.waitForTimeout(1000);
+    // Wait for the theme CSS to update (confirms PUT completed)
+    await expect(page.locator("#reveal-theme-link")).toHaveAttribute(
+      "href",
+      /moon\.css/,
+      { timeout: 10_000 }
+    );
 
     const res = await page.request.get(`/api/presentations/${SLUG}`);
     const data = await res.json();

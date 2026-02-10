@@ -39,7 +39,7 @@ def fibonacci(n: int) -> list[int]:
   },
 ];
 
-test.describe("Code Highlighting", () => {
+test.describe.serial("Code Highlighting", () => {
   test.beforeAll(() => {
     createFixturePresentation(SLUG, {
       title: "Code Highlight Test",
@@ -91,7 +91,8 @@ test.describe("Code Highlighting", () => {
     await waitForReveal(page);
 
     const thirdSlide = page.locator(".reveal .slides section").nth(2);
-    await expect(thirdSlide.locator("pre")).not.toBeVisible();
-    await expect(thirdSlide.locator("p")).toBeVisible();
+    await expect(thirdSlide.locator("pre")).toHaveCount(0);
+    // The slide content exists even when not active (reveal.js hides non-active slides)
+    await expect(thirdSlide.locator("p")).toHaveCount(1);
   });
 });

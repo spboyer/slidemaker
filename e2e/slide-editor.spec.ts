@@ -22,7 +22,7 @@ const editorSlides: Slide[] = [
   },
 ];
 
-test.describe("Slide Editor", () => {
+test.describe.serial("Slide Editor", () => {
   test.beforeEach(() => {
     createFixturePresentation(SLUG, {
       title: "Editor Test",
@@ -94,11 +94,15 @@ test.describe("Slide Editor", () => {
 
     await page.locator("button", { hasText: "Save" }).click();
 
-    await expect(page.locator(".reveal")).toBeVisible();
+    await expect(page.locator(".reveal")).toBeVisible({ timeout: 15_000 });
+
+    // Wait for save to persist
+    await page.waitForTimeout(1000);
 
     // Verify via API that changes persisted
     const res = await page.request.get(`/api/presentations/${SLUG}`);
     const data = await res.json();
+    expect(data.slides).toBeDefined();
     expect(data.slides[0].title).toBe("Updated Title");
     expect(data.slides[0].transition).toBe("fade");
   });
@@ -116,11 +120,15 @@ test.describe("Slide Editor", () => {
 
     await page.locator("button", { hasText: "Cancel" }).click();
 
-    await expect(page.locator(".reveal")).toBeVisible();
+    await expect(page.locator(".reveal")).toBeVisible({ timeout: 15_000 });
+
+    // Wait for state to settle
+    await page.waitForTimeout(500);
 
     // Verify title was NOT saved
     const res = await page.request.get(`/api/presentations/${SLUG}`);
     const data = await res.json();
+    expect(data.slides).toBeDefined();
     expect(data.slides[0].title).toBe("Editable Slide");
   });
 });

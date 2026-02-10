@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import type { Presentation, Slide } from "@/lib/types";
+import type { Presentation, Slide, SlideTransition } from "@/lib/types";
 
 const PRESENTATIONS_DIR = path.join(process.cwd(), "presentations");
 
@@ -79,6 +79,8 @@ export async function PUT(
       ...existing,
       title: (body.title as string) ?? existing.title,
       slides: (body.slides as Slide[]) ?? existing.slides,
+      theme: (body.theme as string) ?? existing.theme,
+      transition: (body.transition as SlideTransition) ?? existing.transition,
       updatedAt: new Date().toISOString(),
     };
 

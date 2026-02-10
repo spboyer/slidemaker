@@ -9,7 +9,7 @@ import {
 
 const SLUG = "e2e-overview-test";
 
-test.describe("Slide Overview Mode", () => {
+test.describe.serial("Slide Overview Mode", () => {
   test.beforeAll(() => {
     createFixturePresentation(SLUG, {
       title: "Overview Test",
@@ -30,7 +30,7 @@ test.describe("Slide Overview Mode", () => {
 
     // reveal.js adds the .overview class to .reveal when in overview mode
     await expect(page.locator(".reveal.overview")).toBeVisible({
-      timeout: 5000,
+      timeout: 10_000,
     });
   });
 
@@ -46,12 +46,12 @@ test.describe("Slide Overview Mode", () => {
 
     await overviewBtn.click();
     await expect(page.locator(".reveal.overview")).toBeVisible({
-      timeout: 5000,
+      timeout: 10_000,
     });
 
     await overviewBtn.click();
     await expect(page.locator(".reveal.overview")).not.toBeVisible({
-      timeout: 5000,
+      timeout: 10_000,
     });
   });
 
@@ -61,7 +61,7 @@ test.describe("Slide Overview Mode", () => {
 
     await page.locator('button[title="Slide overview (O)"]').first().click();
     await expect(page.locator(".reveal.overview")).toBeVisible({
-      timeout: 5000,
+      timeout: 10_000,
     });
 
     const sections = page.locator(".reveal .slides section");

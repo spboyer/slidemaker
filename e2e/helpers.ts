@@ -50,9 +50,9 @@ export function deleteFixturePresentation(slug: string): void {
   }
 }
 
-/** Wait for reveal.js to initialize (the .reveal container to appear) */
+/** Wait for reveal.js to fully initialize (adds .ready class to .reveal) */
 export async function waitForReveal(page: Page): Promise<void> {
-  await page.locator(".reveal .slides section").first().waitFor({ timeout: 15_000 });
+  await page.locator(".reveal.ready .slides section").first().waitFor({ timeout: 15_000 });
 }
 
 export { base as test, expect };

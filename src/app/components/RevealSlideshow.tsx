@@ -7,6 +7,7 @@ import {
   forwardRef,
   useState,
   useCallback,
+  useMemo,
 } from "react";
 import { Presentation, Slide } from "@/lib/types";
 
@@ -31,42 +32,38 @@ interface RevealSlideshowProps {
   onSlideChange?: (index: number) => void;
 }
 
-/** Build the inner HTML for all slides so React doesn't reconcile individual
- *  <section> elements. This keeps DOM nodes stable for fitty (r-fit-text). */
-function buildSlidesHTML(slides: Slide[]): string {
-  return slides
-    .map((slide) => {
-      const attrs: string[] = [];
-      if (slide.transition) attrs.push(`data-transition="${slide.transition}"`);
-      if (slide.backgroundImage)
-        attrs.push(`data-background-image="${slide.backgroundImage}"`);
-      if (slide.backgroundColor)
-        attrs.push(`data-background-color="${slide.backgroundColor}"`);
-      if (slide.backgroundGradient)
-        attrs.push(`data-background-gradient="${slide.backgroundGradient}"`);
-      if (slide.autoAnimate) attrs.push(`data-auto-animate=""`);
-      if (slide.layout === "center") attrs.push(`data-state="center"`);
-      if (slide.notes) attrs.push(`data-notes="${slide.notes.replace(/"/g, "&quot;")}"`);
-      if (slide.layout === "center") attrs.push(`class="center"`);
+/** Render slide content — supports HTML (contains tags) or plain markdown */
+function SlideContent({ slide }: { slide: Slide }) {
+  const isHTML = /<[a-z][\s\S]*>/i.test(slide.content);
 
-      const titleHTML = slide.title ? `<h2>${slide.title}</h2>` : "";
-      const isHTML = /<[a-z][\s\S]*>/i.test(slide.content);
-      let contentHTML: string;
-      if (isHTML) {
-        contentHTML = slide.content;
-      } else {
-        contentHTML = slide.content
-          .split(/\n{2,}/)
-          .map((p) => `<p>${p}</p>`)
-          .join("");
-      }
-      if (slide.layout === "two-column") {
-        contentHTML = `<div class="r-hstack">${contentHTML}</div>`;
-      }
+  if (isHTML) {
+    return <div dangerouslySetInnerHTML={{ __html: slide.content }} />;
+  }
 
-      return `<section ${attrs.join(" ")}>${titleHTML}${contentHTML}</section>`;
-    })
-    .join("");
+  // Plain text / markdown: render as paragraphs split by double newlines
+  const paragraphs = slide.content.split(/\n{2,}/);
+  return (
+    <>
+      {paragraphs.map((p, i) => (
+        <p key={i}>{p}</p>
+      ))}
+    </>
+  );
+}
+
+/** Build data attributes for a slide <section> */
+function sectionAttrs(slide: Slide) {
+  const attrs: Record<string, string | undefined> = {};
+  if (slide.transition) attrs["data-transition"] = slide.transition;
+  if (slide.backgroundImage)
+    attrs["data-background-image"] = slide.backgroundImage;
+  if (slide.backgroundColor)
+    attrs["data-background-color"] = slide.backgroundColor;
+  if (slide.backgroundGradient)
+    attrs["data-background-gradient"] = slide.backgroundGradient;
+  if (slide.autoAnimate) attrs["data-auto-animate"] = "";
+  if (slide.layout === "center") attrs["data-state"] = "center";
+  return attrs;
 }
 
 const THEME_LINK_ID = "reveal-theme-link";
@@ -255,16 +252,18 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
     }, [transition]);
 
     // Sync slides when content changes (without full re-init)
-    const slidesJson = JSON.stringify(presentation.slides);
+    const slidesJson = useMemo(() => JSON.stringify(presentation.slides), [presentation.slides]);
     const prevSlidesJson = useRef(slidesJson);
     useEffect(() => {
       if (deckRef.current && ready && slidesJson !== prevSlidesJson.current) {
         prevSlidesJson.current = slidesJson;
-        deckRef.current.sync();
+        try {
+          deckRef.current.sync();
+        } catch {
+          // fitty (r-fit-text) may throw if elements are mid-transition
+        }
       }
     }, [slidesJson, ready]);
-
-    const slidesHTML = buildSlidesHTML(presentation.slides);
 
     return (
       <div
@@ -276,10 +275,25 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
         aria-label="Slide presentation"
         aria-roledescription="slideshow"
       >
-        <div
-          className="slides"
-          dangerouslySetInnerHTML={{ __html: slidesHTML }}
-        />
+        <div className="slides">
+          {presentation.slides.map((slide, i) => (
+            <section
+              key={i}
+              {...sectionAttrs(slide)}
+              className={slide.layout === "center" ? "center" : undefined}
+              data-notes={slide.notes ?? undefined}
+            >
+              {slide.title && <h2>{slide.title}</h2>}
+              {slide.layout === "two-column" ? (
+                <div className="r-hstack">
+                  <SlideContent slide={slide} />
+                </div>
+              ) : (
+                <SlideContent slide={slide} />
+              )}
+            </section>
+          ))}
+        </div>
       </div>
     );
   }

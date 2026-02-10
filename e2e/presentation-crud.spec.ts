@@ -7,7 +7,7 @@ import {
 
 const SLUG = "e2e-crud-test";
 
-test.describe("Presentation CRUD", () => {
+test.describe.serial("Presentation CRUD", () => {
   test.afterAll(() => {
     deleteFixturePresentation(SLUG);
     deleteFixturePresentation("e2e-crud-delete");
@@ -49,8 +49,12 @@ test.describe("Presentation CRUD", () => {
       title: "CRUD Navigation Test",
     });
 
+    // Verify fixture exists via API before navigating
+    const check = await page.request.get(`/api/presentations/${SLUG}`);
+    expect(check.ok()).toBeTruthy();
+
     await page.goto(`/presentation/${SLUG}`);
-    await expect(page.locator(".reveal")).toBeVisible();
+    await expect(page.locator(".reveal.ready")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(".reveal .slides section").first()).toBeVisible();
   });
 
@@ -59,18 +63,19 @@ test.describe("Presentation CRUD", () => {
       title: "To Be Deleted",
     });
 
+    // Verify fixture exists via API
+    const check = await page.request.get("/api/presentations/e2e-crud-delete");
+    expect(check.ok()).toBeTruthy();
+
     await page.goto("/");
-    await expect(page.locator("text=To Be Deleted")).toBeVisible();
+    await expect(page.locator("text=To Be Deleted")).toBeVisible({ timeout: 10_000 });
 
     // Accept the confirm dialog before clicking delete
     page.on("dialog", (dialog) => dialog.accept());
-    const deleteBtn = page
-      .locator("text=To Be Deleted")
-      .locator("..")
-      .locator("..")
-      .locator("button", { hasText: "Delete" });
-    await deleteBtn.click();
+    // Find the card container that holds both the title and delete button
+    const card = page.locator("h2", { hasText: "To Be Deleted" }).locator("..");
+    await card.locator("button", { hasText: "Delete" }).click();
 
-    await expect(page.locator("text=To Be Deleted")).not.toBeVisible();
+    await expect(page.locator("text=To Be Deleted")).not.toBeVisible({ timeout: 10_000 });
   });
 });

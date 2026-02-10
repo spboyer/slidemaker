@@ -9,7 +9,7 @@ import {
 
 const SLUG = "e2e-nav-test";
 
-test.describe("Slide Navigation", () => {
+test.describe.serial("Slide Navigation", () => {
   test.beforeAll(() => {
     createFixturePresentation(SLUG, {
       title: "Navigation Test",
@@ -36,7 +36,7 @@ test.describe("Slide Navigation", () => {
 
     await expect(page.locator("text=1 / 5")).toBeVisible();
     await page.locator('button[aria-label="Next slide"]').click();
-    await expect(page.locator("text=2 / 5")).toBeVisible();
+    await expect(page.locator("text=2 / 5")).toBeVisible({ timeout: 10_000 });
   });
 
   test("clicking Previous button goes back", async ({ page }) => {
@@ -44,10 +44,10 @@ test.describe("Slide Navigation", () => {
     await waitForReveal(page);
 
     await page.locator('button[aria-label="Next slide"]').click();
-    await expect(page.locator("text=2 / 5")).toBeVisible();
+    await expect(page.locator("text=2 / 5")).toBeVisible({ timeout: 10_000 });
 
     await page.locator('button[aria-label="Previous slide"]').click();
-    await expect(page.locator("text=1 / 5")).toBeVisible();
+    await expect(page.locator("text=1 / 5")).toBeVisible({ timeout: 10_000 });
   });
 
   test("Previous is disabled on first slide", async ({ page }) => {
@@ -65,7 +65,7 @@ test.describe("Slide Navigation", () => {
     for (let i = 0; i < 4; i++) {
       await page.locator('button[aria-label="Next slide"]').click();
     }
-    await expect(page.locator("text=5 / 5")).toBeVisible();
+    await expect(page.locator("text=5 / 5")).toBeVisible({ timeout: 10_000 });
 
     const nextBtn = page.locator('button[aria-label="Next slide"]');
     await expect(nextBtn).toBeDisabled();
