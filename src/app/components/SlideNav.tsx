@@ -9,6 +9,10 @@ interface SlideNavProps {
   onNext: () => void;
   onAddSlide?: () => void;
   onAddBlank?: () => void;
+  onSpeakerNotes?: () => void;
+  onFullscreen?: () => void;
+  onOverview?: () => void;
+  onPdfExport?: () => void;
 }
 
 export default function SlideNav({
@@ -18,6 +22,10 @@ export default function SlideNav({
   onNext,
   onAddSlide,
   onAddBlank,
+  onSpeakerNotes,
+  onFullscreen,
+  onOverview,
+  onPdfExport,
 }: SlideNavProps) {
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalSlides - 1;
@@ -38,25 +46,72 @@ export default function SlideNav({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  const btnBase =
+    "rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20";
+
   return (
     <nav className="flex w-full items-center justify-between bg-black/60 px-6 py-4 backdrop-blur-sm">
       <button
         onClick={onPrevious}
         disabled={isFirst}
         aria-label="Previous slide"
+        title="Previous slide (←)"
         className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
       >
         ← Previous
       </button>
 
-      <span className="text-sm font-medium text-white/80">
-        {currentIndex + 1} / {totalSlides}
-      </span>
+      <div className="flex items-center gap-2">
+        {onSpeakerNotes && (
+          <button
+            onClick={onSpeakerNotes}
+            className={btnBase}
+            title="Speaker notes (S)"
+            aria-label="Speaker notes"
+          >
+            🗒
+          </button>
+        )}
+        {onFullscreen && (
+          <button
+            onClick={onFullscreen}
+            className={btnBase}
+            title="Toggle fullscreen (F)"
+            aria-label="Toggle fullscreen"
+          >
+            ⛶
+          </button>
+        )}
+        {onOverview && (
+          <button
+            onClick={onOverview}
+            className={btnBase}
+            title="Slide overview (O)"
+            aria-label="Slide overview"
+          >
+            ▦
+          </button>
+        )}
+        {onPdfExport && (
+          <button
+            onClick={onPdfExport}
+            className={btnBase}
+            title="Export to PDF (print-pdf)"
+            aria-label="Export to PDF"
+          >
+            📄
+          </button>
+        )}
+        <span className="px-2 text-sm font-medium text-white/80">
+          {currentIndex + 1} / {totalSlides}
+        </span>
+      </div>
 
       <div className="flex items-center gap-2">
         {onAddSlide && (
           <button
             onClick={onAddSlide}
+            title="Add AI-generated slide"
             className="rounded-lg bg-indigo-600/80 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
           >
             + AI Slide
@@ -65,6 +120,7 @@ export default function SlideNav({
         {onAddBlank && (
           <button
             onClick={onAddBlank}
+            title="Add blank slide"
             className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
           >
             + Blank
@@ -74,6 +130,7 @@ export default function SlideNav({
           onClick={onNext}
           disabled={isLast}
           aria-label="Next slide"
+          title="Next slide (→)"
           className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Next →
