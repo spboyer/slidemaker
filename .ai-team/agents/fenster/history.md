@@ -17,3 +17,9 @@
 
 📌 Team update (2026-02-10): CRUD API (#8) and AI generation API (#7) complete — API tests (17 + 8 cases) can now be implemented against live endpoints — decided by McManus
 📌 Team update (2026-02-10): SlideViewer/SlideNav components built for #2 — UI test cases can reference these components — decided by Verbal
+
+- **2026-02-10:** Vitest installed and configured. 23 smoke tests passing: type compilation (3), CRUD file-system integration (8), slug generation (7), API route export verification (3), security slug sanitization (2).
+- **2026-02-10:** `npm run build` passes cleanly (Next.js 16.1.6, Turbopack, TypeScript 0 errors). `npm run lint` passes with 0 issues.
+- **2026-02-10:** vitest.config.ts uses `@` path alias matching tsconfig. Tests run in ~700ms. CRUD integration tests use temp dirs with cleanup to avoid polluting real data.
+- **2026-02-10:** API route handlers (GET/POST for `/api/presentations`, GET/PUT/DELETE for `/api/presentations/[slug]`, POST for `/api/generate`) are confirmed exported and callable as functions. Full HTTP-level integration tests would require running a dev server or using Next.js test utilities.
+- **2026-02-10:** Slug generation sanitizes path traversal (`../`, `..\\`) by stripping non-alphanumeric characters — SEC-1 verified at unit level.
