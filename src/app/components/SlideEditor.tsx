@@ -38,6 +38,8 @@ export default function SlideEditor({
   const [backgroundColor, setBackgroundColor] = useState(slide.backgroundColor ?? "");
   const [backgroundImage, setBackgroundImage] = useState(slide.backgroundImage ?? "");
   const [layout, setLayout] = useState<SlideLayout>(slide.layout ?? "default");
+  const [backgroundGradient, setBackgroundGradient] = useState(slide.backgroundGradient ?? "");
+  const [autoAnimate, setAutoAnimate] = useState(slide.autoAnimate ?? false);
   const [editMode, setEditMode] = useState<"markdown" | "html">("markdown");
   const [useFragments, setUseFragments] = useState(
     slide.content.includes('class="fragment"')
@@ -50,7 +52,9 @@ export default function SlideEditor({
     transition,
     backgroundColor: backgroundColor || undefined,
     backgroundImage: backgroundImage || undefined,
+    backgroundGradient: backgroundGradient || undefined,
     layout,
+    autoAnimate,
   };
 
   const handleSave = () => {
@@ -62,7 +66,9 @@ export default function SlideEditor({
       transition,
       backgroundColor: backgroundColor || undefined,
       backgroundImage: backgroundImage || undefined,
+      backgroundGradient: backgroundGradient || undefined,
       layout,
+      autoAnimate,
     });
   };
 
@@ -155,6 +161,27 @@ export default function SlideEditor({
               className={inputClasses}
               placeholder="https://example.com/image.jpg"
             />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-white/70">Background Gradient</span>
+            <input
+              type="text"
+              value={backgroundGradient}
+              onChange={(e) => setBackgroundGradient(e.target.value)}
+              className={inputClasses}
+              placeholder="linear-gradient(to right, #000, #333)"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 self-end py-2.5">
+            <input
+              type="checkbox"
+              checked={autoAnimate}
+              onChange={(e) => setAutoAnimate(e.target.checked)}
+              className="accent-indigo-500"
+            />
+            <span className="text-sm font-medium text-white/70">Auto-Animate</span>
           </label>
         </div>
 
