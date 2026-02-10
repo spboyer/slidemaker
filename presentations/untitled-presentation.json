@@ -1,62 +1,48 @@
 {
   "id": "untitled-presentation",
   "title": "Untitled Presentation",
-  "createdAt": "2026-02-10T20:30:04.386Z",
-  "updatedAt": "2026-02-10T20:30:04.386Z",
+  "createdAt": "2026-02-10T20:59:03.500Z",
+  "updatedAt": "2026-02-10T20:59:03.500Z",
   "slides": [
     {
       "title": "",
-      "content": "<h2>TypeScript Best Practices</h2>",
-      "notes": "Introduce the topic with a punch. TypeScript is a powerful tool for scaling JavaScript development. This slide sets the tone for the session.",
-      "transition": "zoom",
-      "backgroundGradient": "linear-gradient(to bottom, #1e3c72, #2a5298)",
-      "layout": "center",
-      "autoAnimate": false
+      "content": "<h1>Demystifying TypeScript</h1><p>The essential guide for developers</p>",
+      "notes": "Welcome the audience to the presentation. Introduce yourself and share the goal of the session: to provide a foundational understanding of TypeScript. Mention the target audience: developers with basic JavaScript knowledge. Spend 1-2 minutes setting the stage for the talk.",
+      "transition": "fade",
+      "backgroundGradient": "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)",
+      "layout": "center"
     },
     {
-      "title": "1. Leverage Type Safety",
-      "content": "<ul>\n  <li class=\"fragment fade-in\">Use <strong>strict mode</strong> in tsconfig.json for maximum type safety.</li>\n  <li class=\"fragment fade-up\">Define <strong>explicit types</strong> for function parameters and return values.</li>\n  <li class=\"fragment grow\">Avoid using <code>any</code> type to ensure better type checking.</li>\n</ul>",
-      "notes": "Explain how strict mode ensures developers catch type-related issues early on, and highlight the importance of avoiding 'any'.",
+      "title": "What is TypeScript?",
+      "content": "<ul><li class=\"fragment fade-up\">A superset of JavaScript</li><li class=\"fragment fade-up\">Adds static typing to JavaScript</li><li class=\"fragment fade-up\">Developed by Microsoft in 2012</li><li class=\"fragment fade-up\">Compiles to plain JavaScript</li></ul>",
+      "notes": "Start with the basics: explain that TypeScript builds on JavaScript. Highlight static typing as its key feature—this helps catch errors early. Mention that it's widely adopted and backed by Microsoft. Spend about 2 minutes here.",
       "transition": "slide",
-      "backgroundColor": "#f2f2f2",
-      "layout": "default",
-      "autoAnimate": false
+      "backgroundColor": "#1a1a2e",
+      "layout": "default"
     },
     {
-      "title": "2. Use Interfaces and Types Wisely",
-      "content": "<table>\n  <thead>\n    <tr>\n      <th>Feature</th>\n      <th>Interface</th>\n      <th>Type</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Object Shape</td>\n      <td>✅ Preferred</td>\n      <td>✅ Supported</td>\n    </tr>\n    <tr class=\"fragment fade-in\">\n      <td>Extending</td>\n      <td>✅ Easy</td>\n      <td>✅ Supported</td>\n    </tr>\n    <tr class=\"fragment fade-in\">\n      <td>Union Types</td>\n      <td>❌ Not Supported</td>\n      <td>✅ Preferred</td>\n    </tr>\n  </tbody>\n</table>",
-      "notes": "Discuss when to use interfaces (e.g., for object structure) and when to use types (e.g., for unions or aliases). Emphasize the strengths of both.",
-      "transition": "fade",
-      "backgroundColor": "#ffffff",
-      "layout": "default",
-      "autoAnimate": false
-    },
-    {
-      "title": "3. Embrace Modern Features",
-      "content": "<ul>\n  <li class=\"fragment fade-in\">Use <code>unknown</code> instead of <code>any</code> for safer type assertions.</li>\n  <li class=\"fragment fade-up\">Adopt <code>readonly</code> for immutability where possible.</li>\n  <li class=\"fragment grow\">Leverage <code>enum</code> for clear and maintainable values.</li>\n</ul>",
-      "notes": "Explain how modern TypeScript features help write more robust and maintainable code. Provide examples if time allows.",
+      "title": "Why Use TypeScript?",
+      "content": "<ul><li class=\"fragment highlight-blue\">Improved developer productivity</li><li class=\"fragment highlight-green\">Catch bugs early with type checking</li><li class=\"fragment fade-up\">Better tooling and autocompletion</li><li class=\"fragment fade-up\">Scales well for large codebases</li></ul>",
+      "notes": "Focus on the benefits of TypeScript that resonate with your audience. Discuss how static typing leads to fewer runtime errors and better collaboration in teams. Highlight modern IDE support for TypeScript, which makes development faster and more efficient. Ask the audience: 'Who here has struggled with a bug that could have been caught by TypeScript?'",
       "transition": "convex",
-      "backgroundGradient": "linear-gradient(to right, #ff7e5f, #feb47b)",
-      "layout": "default",
-      "autoAnimate": false
+      "backgroundGradient": "linear-gradient(135deg, #16213e 0%, #0f3460 50%, #0c0c1d 100%)",
+      "layout": "default"
     },
     {
-      "title": "4. Avoid Common Pitfalls",
-      "content": "<ul>\n  <li class=\"fragment fade-in\">Don't overuse <code>any</code> or <code>! (non-null assertion)</code>.</li>\n  <li class=\"fragment fade-up\">Avoid mixing JavaScript and TypeScript files in the same project.</li>\n  <li class=\"fragment fade-in-then-semi-out\">Be cautious with <code>ts-ignore</code> — it's a last resort.</li>\n</ul>",
-      "notes": "Highlight common mistakes developers make when starting out with TypeScript. Stress the importance of clean, consistent practices.",
-      "transition": "fade",
-      "backgroundColor": "#f8f9fa",
-      "layout": "default",
-      "autoAnimate": false
+      "title": "TypeScript in Action",
+      "content": "<pre><code class=\"language-typescript\" data-trim data-noescape data-line-numbers=\"1-2|3-4\">\n// Define a type\ninterface User {\n  name: string;\n  age: number;\n}\n\n// Use the type\nconst welcomeUser = (user: User): string => {\n  return `Welcome, ${user.name}, age ${user.age}!`;\n}\n</code></pre>",
+      "notes": "Walk through the code step by step. First, explain what an interface is and how it defines the shape of an object. Then, show how the function uses the 'User' type, ensuring that 'name' is a string and 'age' is a number. Highlight how this helps catch errors during development. Spend around 3 minutes here.",
+      "transition": "zoom",
+      "backgroundColor": "#0c0c1d",
+      "layout": "default"
     },
     {
-      "title": "",
-      "content": "<blockquote cite=\"Anders Hejlsberg\">\n  <p>\"TypeScript is not about catching bugs, it's about making you a more productive developer.\"</p>\n  <footer>— <cite>Anders Hejlsberg</cite></footer>\n</blockquote>",
-      "notes": "End with an inspiring quote from the creator of TypeScript to leave the audience with a sense of purpose and motivation.",
+      "title": "Key Takeaways",
+      "content": "<ul><li class=\"fragment fade-up\">TypeScript enhances JavaScript with static typing</li><li class=\"fragment fade-up\">It improves code quality and maintainability</li><li class=\"fragment fade-up\">Adopting TypeScript is simple and worth it!</li><li class=\"fragment fade-up\">Start small—convert one file at a time</li></ul>",
+      "notes": "Summarize the key points of the presentation. Reinforce the benefits of TypeScript and encourage the audience to try it out. Suggest starting with a small project or converting a single JavaScript file to TypeScript. End with a call to action: 'Give it a shot!' Spend 2 minutes wrapping up, and open the floor for questions if time allows.",
       "transition": "concave",
-      "backgroundGradient": "linear-gradient(to bottom, #0f2027, #203a43, #2c5364)",
-      "layout": "center",
-      "autoAnimate": false
+      "backgroundGradient": "linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #0c0c1d 100%)",
+      "layout": "default"
     }
   ]
 }

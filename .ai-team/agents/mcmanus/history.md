@@ -76,3 +76,16 @@
 - Stripped `r-fit-text` from `presentations/untitled-presentation.json` (the only existing presentation file containing it).
 - **Reason:** reveal.js's fitty library (used by `r-fit-text`) runs a `requestAnimationFrame` loop that crashes with `TypeError: Cannot read properties of null (reading 'clientWidth')` when React reconciles and removes DOM nodes. Verbal is also stripping `r-fit-text` on the rendering side.
 - Build and all 50 unit tests pass.
+
+### 2026-02-10 — SYSTEM_PROMPT V2: Conference-Quality Slide Generation
+- Rewrote SYSTEM_PROMPT in `src/app/api/generate/route.ts` for dramatically better slide output matching revealjs.com demo quality.
+- **Slide Type Taxonomy**: Defined 8 required slide types (Cover, Section Divider, Content, Code, Comparison, Quote, Impact, Closing) with specific HTML structure rules for each.
+- **Typography Rules**: h1 only on cover slide, h2 for all other headings, 3-7 word titles, 3-4 lines max per slide.
+- **HTML Quality Rules (STRICT)**: Max 5 bullets per slide, no nested lists, no r-fit-text, no nested sections, code blocks must use data-trim data-noescape, fragments on ~60% of slides not 100%.
+- **Background Design**: Cover must have dark gradient, section dividers must have contrasting backgrounds, 40%+ slides with custom backgrounds, defined complementary color palettes.
+- **Speaker Notes Quality**: Timing cues, engagement prompts, transition hints — not just restating slide content.
+- **Theme Intelligence**: Technical→night/black/moon, business→white/simple/serif, creative→league/sky/solarized. NEVER suggest "beige".
+- **Example Deck Fragment**: 3-slide example (cover, impact auto-animate start, content auto-animate end) replacing the old 2-slide example.
+- **STYLE_INSTRUCTIONS upgraded**: Each style now includes specific feature guidance (e.g. technical requires 2+ code slides with data-line-numbers).
+- Constraints preserved: no r-fit-text, no vertical slides, JSON format unchanged.
+- Build passes, all 50 unit tests pass.

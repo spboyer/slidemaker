@@ -26,44 +26,147 @@ body {
 }
 
 /*
- * Undo Tailwind v4 base resets inside reveal.js slides.
- * `all: revert` restores browser defaults so reveal.js theme styles
- * (which rely on UA styles) take precedence for all 11 themes.
+ * Undo ONLY the specific Tailwind v4 base resets that conflict with reveal.js.
+ * Tailwind v4 resets margin, padding, list-style, font, border, and text-decoration.
+ * We revert only those properties so reveal.js theme styles are fully preserved.
  */
+
+/* Headings: Tailwind resets font-size/font-weight/margin via `font: inherit; margin: 0` */
 .reveal .slides h1,
 .reveal .slides h2,
 .reveal .slides h3,
 .reveal .slides h4,
 .reveal .slides h5,
-.reveal .slides h6,
-.reveal .slides p,
+.reveal .slides h6 {
+  font-size: revert;
+  font-weight: revert;
+  margin: revert;
+}
+
+/* Paragraphs: Tailwind resets margin */
+.reveal .slides p {
+  margin: revert;
+}
+
+/* Lists: Tailwind resets list-style, padding, and margin */
 .reveal .slides ul,
-.reveal .slides ol,
-.reveal .slides li,
-.reveal .slides blockquote,
-.reveal .slides table,
+.reveal .slides ol {
+  list-style: revert;
+  padding: revert;
+  margin: revert;
+}
+
+.reveal .slides li {
+  margin: revert;
+}
+
+/* Blockquote: Tailwind resets margin */
+.reveal .slides blockquote {
+  margin: revert;
+}
+
+/* Table elements: Tailwind resets border, padding, margin */
+.reveal .slides table {
+  border-collapse: revert;
+  border-spacing: revert;
+  margin: revert;
+}
+
 .reveal .slides thead,
 .reveal .slides tbody,
+.reveal .slides tr {
+  border: revert;
+}
+
 .reveal .slides th,
-.reveal .slides td,
-.reveal .slides tr,
-.reveal .slides pre,
-.reveal .slides code,
-.reveal .slides a,
-.reveal .slides img,
+.reveal .slides td {
+  border: revert;
+  padding: revert;
+  text-align: revert;
+}
+
+/* Pre/Code: Tailwind resets font-family, font-size, margin */
+.reveal .slides pre {
+  font-family: revert;
+  font-size: revert;
+  margin: revert;
+}
+
+.reveal .slides code {
+  font-family: revert;
+  font-size: revert;
+}
+
+/* Links: Tailwind resets color and text-decoration */
+.reveal .slides a {
+  color: revert;
+  text-decoration: revert;
+}
+
+/* Images: Tailwind resets max-width and display */
+.reveal .slides img {
+  max-width: revert;
+  display: revert;
+  margin: revert;
+}
+
+/* Inline elements: Tailwind resets font-style/font-weight */
 .reveal .slides strong,
-.reveal .slides b,
+.reveal .slides b {
+  font-weight: revert;
+}
+
 .reveal .slides em,
-.reveal .slides i,
-.reveal .slides small,
+.reveal .slides i {
+  font-style: revert;
+}
+
+.reveal .slides small {
+  font-size: revert;
+}
+
 .reveal .slides sub,
-.reveal .slides sup,
+.reveal .slides sup {
+  font-size: revert;
+  vertical-align: revert;
+}
+
+/* Definition lists: Tailwind resets margin */
 .reveal .slides dl,
 .reveal .slides dt,
-.reveal .slides dd,
+.reveal .slides dd {
+  margin: revert;
+}
+
+/* Figures: Tailwind resets margin */
 .reveal .slides figure,
 .reveal .slides figcaption {
-  all: revert;
+  margin: revert;
+}
+
+/*
+ * r-fit-text replacement: standalone title headings should be large and impactful.
+ * Since we strip r-fit-text to prevent the fitty crash, these rules compensate.
+ */
+.reveal .slides section h1:first-child:last-of-type,
+.reveal .slides section h2:first-child:last-of-type {
+  font-size: 2.5em;
+}
+
+.reveal .slides section h1:first-child:only-child,
+.reveal .slides section h2:first-child:only-child {
+  font-size: 3em;
+}
+
+/*
+ * Fragment animations: ensure Tailwind doesn't interfere with reveal.js
+ * fragment transitions (opacity, transform, visibility).
+ */
+.reveal .slides .fragment {
+  opacity: revert;
+  transform: revert;
+  visibility: revert;
+  transition: revert;
 }
 
 /* Ensure overview mode pointer events are not blocked */
