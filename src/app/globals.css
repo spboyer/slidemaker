@@ -26,6 +26,22 @@ body {
 }
 
 /*
+ * reveal.js viewport and container: override Tailwind's body background/color cascade.
+ * The theme sets --r-background-color and --r-main-color on :root, but body's
+ * background: var(--background) and color: var(--foreground) from Tailwind cascade
+ * through and win. We force the reveal.js custom properties here.
+ */
+.reveal-viewport {
+  background-color: var(--r-background-color, #191919) !important;
+  color: var(--r-main-color, #fff) !important;
+}
+
+.reveal {
+  color: var(--r-main-color, #fff) !important;
+  font-family: var(--r-main-font, "Source Sans Pro", Helvetica, sans-serif) !important;
+}
+
+/*
  * Undo ONLY the specific Tailwind v4 base resets that conflict with reveal.js.
  * Tailwind v4 resets margin, padding, list-style, font, border, and text-decoration
  * via low-specificity selectors (element tags or *). The reveal.js theme CSS at
@@ -138,20 +154,6 @@ body {
 .reveal .slides figure,
 .reveal .slides figcaption {
   margin: revert;
-}
-
-/*
- * r-fit-text replacement: standalone title headings should be large and impactful.
- * Since we strip r-fit-text to prevent the fitty crash, these rules compensate.
- */
-.reveal .slides section h1:first-child:last-of-type,
-.reveal .slides section h2:first-child:last-of-type {
-  font-size: 2.5em;
-}
-
-.reveal .slides section h1:first-child:only-child,
-.reveal .slides section h2:first-child:only-child {
-  font-size: 3em;
 }
 
 /*
