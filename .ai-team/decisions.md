@@ -276,3 +276,10 @@ Also added r-fit-text compensation CSS (standalone title headings render at 2.5�
 **Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
 
 The `r-fit-text` CSS class is stripped from slide HTML content before rendering via `stripFitText()` in `RevealSlideshow.tsx`. This prevents fitty's `requestAnimationFrame` loop from crashing when React reconciliation detaches DOM nodes that fitty still holds references to.
+
+---
+
+### Default Theme Locked to "black"
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Status:** Directive (Shayne Boyer)
+
+`black` set as the one and only default theme with `slide` transition. Matches the revealjs.com demo (`#191919` background, white text, Source Sans Pro font, `#42affa` link color). Updated defaults in `RevealSlideshow.tsx`, `page.tsx`, `route.ts` SYSTEM_PROMPT, and `untitled-presentation.json`. Fixed CSS specificity issue where `.reveal .slides h1` reverts at (0,2,1) were overriding theme heading sizes from `.reveal h1` at (0,1,1). Created 8-slide showcase presentation.

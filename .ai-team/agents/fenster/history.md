@@ -39,3 +39,4 @@
 📌 Team update (2026-02-10): CSS `all: revert` replaced with targeted property reverts — all 11 reveal.js themes now render correctly — decided by Verbal (based on Keyser audit)
 📌 Team update (2026-02-10): SYSTEM_PROMPT V2 deployed — 8-type slide taxonomy, strict HTML rules, curated backgrounds, theme intelligence — decided by McManus
 📌 Team update (2026-02-10): r-fit-text removed from AI prompt and stripped from rendering — fitty crash eliminated — decided by McManus & Verbal
+📌 Team update (2026-02-10): Default theme locked to "black" with slide transition — CSS heading specificity fixed, 8-slide showcase created — decided by Verbal (directive by Shayne Boyer)

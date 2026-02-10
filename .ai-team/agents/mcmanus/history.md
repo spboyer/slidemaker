@@ -92,3 +92,4 @@
 📌 Team update (2026-02-10): CSS `all: revert` replaced with targeted property reverts — all 11 reveal.js themes now render correctly — decided by Verbal (based on Keyser audit)
 📌 Team update (2026-02-10): Console error detection e2e tests added — `page.on('pageerror')` catches uncaught JS errors during Playwright runs — decided by Fenster
 📌 Team update (2026-02-10): r-fit-text stripped from rendering in RevealSlideshow — fitty crash eliminated — decided by Verbal
+📌 Team update (2026-02-10): Default theme locked to "black" with slide transition — SYSTEM_PROMPT default updated in route.ts — decided by Verbal (directive by Shayne Boyer)
