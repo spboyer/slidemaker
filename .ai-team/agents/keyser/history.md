@@ -18,3 +18,6 @@
 - Added dependency comments to issues #1, #3, #4, #5, #6, #9
 - US-2 (#2) and the two backend APIs (#7, #8) can start immediately in parallel
 - Decision recorded in `.ai-team/decisions/inbox/keyser-prd-decomposition.md`
+
+📌 Team update (2026-02-10): APIs (#7, #8) and slide viewer (#2) complete — frontend stories US-3/5/6 unblocked, US-1/4 unblocked — decided by McManus & Verbal
+📌 Team update (2026-02-10): Test plan with 40+ cases ready — smoke tests can run once APIs are exercised — decided by Fenster

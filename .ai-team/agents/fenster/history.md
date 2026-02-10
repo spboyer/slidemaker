@@ -14,3 +14,6 @@
 - **2026-02-10:** No test runner installed yet (per plan). File is structured to be picked up by vitest or jest when added later.
 - **2026-02-10:** Security test cases documented: path traversal in slugs (SEC-1), XSS in markdown (SEC-2), large payloads (SEC-3), API key leakage (SEC-4).
 - **2026-02-10:** Types (`Slide`, `Presentation`) from `src/lib/types.ts` are clean — all required/optional fields verified at runtime.
+
+📌 Team update (2026-02-10): CRUD API (#8) and AI generation API (#7) complete — API tests (17 + 8 cases) can now be implemented against live endpoints — decided by McManus
+📌 Team update (2026-02-10): SlideViewer/SlideNav components built for #2 — UI test cases can reference these components — decided by Verbal
