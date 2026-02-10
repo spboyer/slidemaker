@@ -43,7 +43,7 @@ function detectCodeRequest(text: string): boolean {
 function inferStyle(text: string): string | undefined {
   if (detectCodeRequest(text)) return "technical";
   if (/technical|code|programming|developer/i.test(text)) return "technical";
-  if (/business|corporate|executive/i.test(text)) return "business";
+  if (/business|corporate|executive/i.test(text)) return "professional";
   if (/creative|design|artistic/i.test(text)) return "creative";
   return undefined;
 }
@@ -112,7 +112,7 @@ export default function PresentationChat({
       onSlidesGenerated(slides);
 
       // Suggest a theme based on style
-      const suggestedTheme = style === "technical" ? "moon" : style === "business" ? "simple" : undefined;
+      const suggestedTheme = style === "technical" ? "moon" : style === "professional" ? "simple" : undefined;
 
       setMessages((prev) => [
         ...prev,
