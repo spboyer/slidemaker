@@ -1,0 +1,20 @@
+{
+  "name": "@slidemaker/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for SlideМaker — expose presentations as tools for Claude, Copilot CLI, and any MCP client",
+  "type": "module",
+  "bin": {
+    "slidemaker-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT"
+}
