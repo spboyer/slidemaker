@@ -8,3 +8,4 @@
 ## Learnings
 
 <!-- Append new learnings below. Each entry is something lasting about the project. -->
+- **2026-02-10 — Issue #2 (slide viewer/nav):** Created `SlideViewer.tsx`, `SlideNav.tsx`, and `presentation/[slug]/page.tsx`. Tailwind v4 with `@import "tailwindcss"` works fine; `prose prose-invert` classes work without `@tailwindcss/typography` plugin in Tailwind v4. react-markdown v10 uses default export. Build passes cleanly with Next.js 16 + Turbopack.
