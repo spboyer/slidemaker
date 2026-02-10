@@ -24,6 +24,9 @@ export default function SlideNav({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Let reveal.js handle keyboard when its container is focused
+      const revealEl = document.querySelector(".reveal");
+      if (revealEl?.contains(e.target as Node)) return;
       if (e.key === "ArrowLeft" && !isFirst) onPrevious();
       if (e.key === "ArrowRight" && !isLast) onNext();
     },
