@@ -47,21 +47,21 @@ export default function SlideNav({
   }, [handleKeyDown]);
 
   const btnBase =
-    "rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20";
+    "rounded bg-white/10 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20";
 
   return (
-    <nav className="flex w-full items-center justify-between bg-black/60 px-6 py-4 backdrop-blur-sm">
+    <nav className="flex w-full items-center justify-between bg-black/60 px-3 py-1.5 backdrop-blur-sm">
       <button
         onClick={onPrevious}
         disabled={isFirst}
         aria-label="Previous slide"
         title="Previous slide (←)"
-        className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        ← Previous
+        ←
       </button>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {onSpeakerNotes && (
           <button
             onClick={onSpeakerNotes}
@@ -102,26 +102,26 @@ export default function SlideNav({
             📄
           </button>
         )}
-        <span className="px-2 text-sm font-medium text-white/80">
+        <span className="px-1 text-xs font-medium text-white/80">
           {currentIndex + 1} / {totalSlides}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {onAddSlide && (
           <button
             onClick={onAddSlide}
             title="Add AI-generated slide"
-            className="rounded-lg bg-indigo-600/80 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
+            className="rounded bg-indigo-600/80 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-indigo-500"
           >
-            + AI Slide
+            + AI
           </button>
         )}
         {onAddBlank && (
           <button
             onClick={onAddBlank}
             title="Add blank slide"
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+            className="rounded bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20"
           >
             + Blank
           </button>
@@ -131,9 +131,9 @@ export default function SlideNav({
           disabled={isLast}
           aria-label="Next slide"
           title="Next slide (→)"
-          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Next →
+          →
         </button>
       </div>
     </nav>

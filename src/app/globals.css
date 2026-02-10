@@ -169,6 +169,33 @@ body {
  * the animation. Only revert transition timing if needed.
  */
 
+/*
+ * Fragment visibility in embedded editor mode:
+ * reveal.js starts fragments at opacity:0/visibility:hidden — correct for
+ * presentation mode but makes slide content look empty in the editor.
+ * Show all fragments in embedded mode so users can see all content.
+ * Fragments still animate correctly in fullscreen presentation mode.
+ */
+.reveal.embedded .slides .fragment:not(.visible) {
+  opacity: 1;
+  visibility: inherit;
+}
+
+/*
+ * Navigation controls: reveal.js defaults to black controls which are
+ * invisible on dark themes. Use the theme's link color for visibility.
+ */
+.reveal .controls {
+  color: var(--r-link-color, #42affa) !important;
+}
+
+/*
+ * Progress bar: ensure it uses the theme's link color for consistency.
+ */
+.reveal .progress {
+  color: var(--r-link-color, #42affa);
+}
+
 /* Ensure overview mode pointer events are not blocked */
 .reveal.overview .slides section {
   cursor: pointer;

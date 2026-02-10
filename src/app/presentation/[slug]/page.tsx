@@ -352,12 +352,12 @@ export default function PresentationPage() {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-          <Link href="/" className="text-sm text-indigo-400 hover:text-indigo-300">
-            ← Back to presentations
+        <div className="flex items-center justify-between border-b border-white/10 px-3 py-1">
+          <Link href="/" className="text-xs text-indigo-400 hover:text-indigo-300">
+            ←
           </Link>
-          <span className="text-sm font-medium text-white">{presentation.title}</span>
-          <div className="flex gap-2">
+          <span className="truncate px-2 text-xs font-medium text-white/80">{presentation.title}</span>
+          <div className="flex gap-1.5">
             <ThemePicker
               currentTheme={presentation.theme ?? "black"}
               onThemeChange={handleThemeChange}
@@ -407,8 +407,8 @@ export default function PresentationPage() {
             startSlide={currentSlideIndex}
             onSlideChange={handleSlideChanged}
           />
-          <div className="pointer-events-none absolute bottom-2 right-2 text-[10px] text-white/30">
-            Press S for speaker notes
+          <div className="pointer-events-none absolute top-1 right-2 text-[10px] text-white/20">
+            S = notes
           </div>
         </div>
 
