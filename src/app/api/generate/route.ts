@@ -41,8 +41,19 @@ export async function POST(request: NextRequest) {
       userMessage += `\n\nExisting slides in the deck (generate slides that complement these):\n${JSON.stringify(body.existingSlides, null, 2)}`;
     }
 
-    const response = await getOpenAIClient().chat.completions.create({
-      model: "gpt-4o",
+    let client;
+    try {
+      client = getOpenAIClient();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to initialize AI client. Check your GitHub authentication.";
+      return NextResponse.json({ error: message }, { status: 401 });
+    }
+
+    const response = await client.chat.completions.create({
+      model: "openai/gpt-4o",
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -85,7 +96,10 @@ export async function POST(request: NextRequest) {
 
       if (apiError.status === 401) {
         return NextResponse.json(
-          { error: "Invalid OpenAI API key. Please check your configuration." },
+          {
+            error:
+              "Invalid or expired GitHub token. Run 'gh auth login' or check your GITHUB_TOKEN.",
+          },
           { status: 401 }
         );
       }

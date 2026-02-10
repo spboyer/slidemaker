@@ -41,3 +41,13 @@
 📌 Team update (2026-02-10): Test plan created with 40+ cases; security cases SEC-1–SEC-4 documented — ensure slug sanitization for path traversal — decided by Fenster
 📌 Team update (2026-02-10): SlideViewer/SlideNav components built for #2; will switch from sample data to API fetch when #7 is ready — decided by Verbal
 📌 Team update (2026-02-10): Vitest installed with 23 passing tests — `npm run test` available, CRUD integration tests use temp dirs — decided by Fenster
+
+### 2026-02-10 — Switched to GitHub Models API (Issue #12)
+- `src/lib/openai.ts` now uses `resolveGitHubToken()` which checks `GITHUB_TOKEN` env var first, then falls back to `execSync("gh auth token")` for local dev auto-detection.
+- OpenAI SDK kept as HTTP client dependency, but `baseURL` changed to `https://models.github.ai/inference`.
+- Model name convention for GitHub Models: prefix with provider, e.g. `openai/gpt-4o` instead of `gpt-4o`.
+- `getOpenAIClient()` now throws a descriptive error if no token is found — callers should catch this.
+- `src/app/api/generate/route.ts` wraps `getOpenAIClient()` in a try/catch, returning 401 with a friendly message when auth is missing.
+- `.env.local.example` updated — `OPENAI_API_KEY` replaced with `GITHUB_TOKEN` instructions (commented out by default since local dev auto-detects).
+- Build and all 23 tests pass after changes.
+- Branch: `squad/12-github-models-api`
