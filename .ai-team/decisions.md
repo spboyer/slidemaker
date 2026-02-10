@@ -164,3 +164,17 @@ Replaced direct OpenAI API integration with GitHub Models API. The OpenAI SDK is
 reveal.js CSS (base `reveal.css` and theme files) cannot be imported via JS `import` in Next.js dynamic imports — they must be loaded as `<link>` tags. The `RevealSlideshow` component injects `<link>` elements into `<head>` pointing to jsDelivr CDN (`https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/...`). Theme switching swaps the `href` on the existing link. Both links are cleaned up on unmount. If the team wants to self-host these CSS files later, update the `loadRevealBaseCSS()` and `loadThemeCSS()` functions in `RevealSlideshow.tsx`.
 
 reveal.js 5.x ships no TypeScript declarations — `src/types/reveal.d.ts` provides ambient module declarations. Keep this in sync if new reveal.js APIs are used.
+
+---
+
+### 2026-02-10: Always update docs, tests, and agents.md with changes
+**By:** Shayne Boyer (via Copilot)
+**What:** When making changes or additions to the codebase, always update related documentation (README, inline docs), tests, and agents.md. No change ships without corresponding doc/test updates.
+**Why:** User directive — ensures the project stays well-documented and tested as it evolves.
+
+---
+
+### README Documentation Standard
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **PR:** #31
+
+Replaced the default create-next-app boilerplate README with comprehensive SlideМaker documentation. The README now covers: features, tech stack, prerequisites (GitHub CLI), environment setup (gh auth login flow), usage guide with keyboard shortcuts, API reference for all endpoints, development commands, and project structure. No secrets or tokens are included — follows the team security directive. MIT license declared.

@@ -52,3 +52,4 @@
 - Build and all 23 tests pass after changes.
 - Branch: `squad/12-github-models-api`
 📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
+📌 Team update (2026-02-10): Always update docs, tests, and agents.md when making changes — directive by Shayne Boyer

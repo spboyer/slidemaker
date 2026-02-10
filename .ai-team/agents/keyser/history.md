@@ -22,3 +22,4 @@
 📌 Team update (2026-02-10): APIs (#7, #8) and slide viewer (#2) complete — frontend stories US-3/5/6 unblocked, US-1/4 unblocked — decided by McManus & Verbal
 📌 Team update (2026-02-10): Test plan with 40+ cases ready — smoke tests can run once APIs are exercised — decided by Fenster
 📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
+📌 Team update (2026-02-10): Always update docs, tests, and agents.md when making changes — directive by Shayne Boyer
