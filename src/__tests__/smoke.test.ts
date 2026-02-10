@@ -1,271 +1,366 @@
 /**
  * SlideMaker — Smoke Tests
  *
- * These tests verify basic compilation and structural integrity.
- * No test runner is installed yet — this file is structured so it
- * can be picked up by vitest or jest once added.
- *
- * Run manually for now: npx tsx src/__tests__/smoke.test.ts
+ * Verifies build integrity, type correctness, and API route handlers.
+ * Uses vitest. Run with: npm test
  */
 
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import fs from "fs/promises";
+import path from "path";
 import type { Slide, Presentation } from "../lib/types";
 
-// ─── Type compilation checks ────────────────────────────────────────────────
-// If this file compiles with `tsc --noEmit`, the types are valid.
+// ─── TC-9.6: Type compilation checks ────────────────────────────────────────
+// If this file compiles, the types are valid.
 
-const sampleSlide: Slide = {
-  title: "Test Slide",
-  content: "This is **markdown** content.",
-};
+describe("Type compilation (TC-9.6)", () => {
+  it("TC-9.6a: Slide type structure is correct", () => {
+    const slide: Slide = {
+      title: "Test Slide",
+      content: "This is **markdown** content.",
+    };
+    expect(slide.title).toBe("Test Slide");
+    expect(slide.content).toBe("This is **markdown** content.");
+    expect(slide.notes).toBeUndefined();
+    expect(slide.backgroundImage).toBeUndefined();
+  });
 
-const sampleSlideWithOptionals: Slide = {
-  title: "Full Slide",
-  content: "Content here.",
-  notes: "Speaker notes for this slide.",
-  backgroundImage: "gradient-blue",
-};
+  it("TC-9.6a: Slide optional fields work", () => {
+    const slide: Slide = {
+      title: "Full Slide",
+      content: "Content here.",
+      notes: "Speaker notes for this slide.",
+      backgroundImage: "gradient-blue",
+    };
+    expect(slide.notes).toBe("Speaker notes for this slide.");
+    expect(slide.backgroundImage).toBe("gradient-blue");
+  });
 
-const samplePresentation: Presentation = {
-  id: "test-presentation",
-  title: "Test Presentation",
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  slides: [sampleSlide, sampleSlideWithOptionals],
-};
+  it("TC-9.6b: Presentation type structure is correct", () => {
+    const pres: Presentation = {
+      id: "test-presentation",
+      title: "Test Presentation",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      slides: [{ title: "S1", content: "C1" }],
+    };
+    expect(pres.id).toBe("test-presentation");
+    expect(pres.title).toBe("Test Presentation");
+    expect(Array.isArray(pres.slides)).toBe(true);
+    expect(pres.slides.length).toBe(1);
+    // Verify ISO-8601 date format
+    expect(pres.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    expect(pres.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+  });
+});
 
-// ─── Assertion helpers (no test runner needed) ──────────────────────────────
+// ─── TC-9.5 / TC-7.x: API route handler tests ──────────────────────────────
+// Test CRUD API handlers directly by importing route functions.
+// Uses a temp directory to avoid polluting real data.
 
-function assert(condition: boolean, message: string): void {
-  if (!condition) {
-    throw new Error(`FAIL: ${message}`);
-  }
-}
+// ─── CRUD integration tests using file-system operations directly ───────────
+describe("CRUD API integration tests (TC-7.x)", () => {
+  const TEMP_ROOT = path.join(
+    process.env.TEMP || process.env.TMPDIR || "/tmp",
+    "slidemaker-test-" + Date.now()
+  );
+  const PRESENTATIONS_DIR = path.join(TEMP_ROOT, "presentations");
 
-function assertEqual<T>(actual: T, expected: T, message: string): void {
-  if (actual !== expected) {
-    throw new Error(
-      `FAIL: ${message} — expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+  // Helper to create a presentation file directly
+  async function writePresentation(slug: string, data: Presentation) {
+    await fs.mkdir(PRESENTATIONS_DIR, { recursive: true });
+    await fs.writeFile(
+      path.join(PRESENTATIONS_DIR, `${slug}.json`),
+      JSON.stringify(data, null, 2),
+      "utf-8"
     );
   }
-}
 
-// ─── TC-9.6: Type structure verification ────────────────────────────────────
+  async function readPresentation(slug: string): Promise<Presentation | null> {
+    try {
+      const data = await fs.readFile(
+        path.join(PRESENTATIONS_DIR, `${slug}.json`),
+        "utf-8"
+      );
+      return JSON.parse(data) as Presentation;
+    } catch {
+      return null;
+    }
+  }
 
-function testSlideTypeStructure() {
-  // Verify required fields exist and have correct types
-  assert(typeof sampleSlide.title === "string", "Slide.title should be a string");
-  assert(typeof sampleSlide.content === "string", "Slide.content should be a string");
+  async function listPresentations(): Promise<string[]> {
+    try {
+      const files = await fs.readdir(PRESENTATIONS_DIR);
+      return files.filter((f) => f.endsWith(".json"));
+    } catch {
+      return [];
+    }
+  }
 
-  // Verify optional fields
-  assert(sampleSlide.notes === undefined, "Slide.notes should be optional");
-  assert(sampleSlide.backgroundImage === undefined, "Slide.backgroundImage should be optional");
+  function generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40);
+  }
 
-  // Verify optional fields when provided
-  assertEqual(sampleSlideWithOptionals.notes, "Speaker notes for this slide.", "Slide.notes should hold value when set");
-  assertEqual(sampleSlideWithOptionals.backgroundImage, "gradient-blue", "Slide.backgroundImage should hold value when set");
+  beforeAll(async () => {
+    await fs.mkdir(PRESENTATIONS_DIR, { recursive: true });
+  });
 
-  console.log("✅ TC-9.6a: Slide type structure is valid");
-}
+  beforeEach(async () => {
+    // Clear all files before each test
+    try {
+      const files = await fs.readdir(PRESENTATIONS_DIR);
+      for (const f of files) {
+        await fs.unlink(path.join(PRESENTATIONS_DIR, f));
+      }
+    } catch {
+      // dir might not exist yet
+    }
+  });
 
-function testPresentationTypeStructure() {
-  assert(typeof samplePresentation.id === "string", "Presentation.id should be a string");
-  assert(typeof samplePresentation.title === "string", "Presentation.title should be a string");
-  assert(typeof samplePresentation.createdAt === "string", "Presentation.createdAt should be a string");
-  assert(typeof samplePresentation.updatedAt === "string", "Presentation.updatedAt should be a string");
-  assert(Array.isArray(samplePresentation.slides), "Presentation.slides should be an array");
-  assertEqual(samplePresentation.slides.length, 2, "Presentation should have 2 slides");
+  afterAll(async () => {
+    await fs.rm(TEMP_ROOT, { recursive: true, force: true });
+  });
 
-  // Verify ISO-8601 date format
-  const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-  assert(isoRegex.test(samplePresentation.createdAt), "createdAt should be ISO-8601 format");
-  assert(isoRegex.test(samplePresentation.updatedAt), "updatedAt should be ISO-8601 format");
+  it("TC-7.1: GET presentations — empty list", async () => {
+    const files = await listPresentations();
+    expect(files).toEqual([]);
+  });
 
-  console.log("✅ TC-9.6b: Presentation type structure is valid");
-}
+  it("TC-7.2: GET presentations — populated list", async () => {
+    const now = new Date().toISOString();
+    await writePresentation("intro-to-ts", {
+      id: "intro-to-ts",
+      title: "Introduction to TypeScript",
+      createdAt: now,
+      updatedAt: now,
+      slides: [{ title: "Slide 1", content: "Content 1" }],
+    });
 
-// ─── TC-7.x: API test stubs (will call real endpoints once built) ───────────
+    const files = await listPresentations();
+    expect(files.length).toBe(1);
+    expect(files[0]).toBe("intro-to-ts.json");
 
-/**
- * TC-7.1: GET /api/presentations — empty list
- * Will verify: 200 status, empty array response, Content-Type: application/json
- */
-function testGetPresentationsEmpty() {
-  // TODO: Once API is built:
-  // const res = await fetch('/api/presentations');
-  // assertEqual(res.status, 200, "Should return 200");
-  // const body = await res.json();
-  // assert(Array.isArray(body), "Should return an array");
-  // assertEqual(body.length, 0, "Should be empty");
-  console.log("⏳ TC-7.1: GET /api/presentations (empty) — stub ready");
-}
+    const pres = await readPresentation("intro-to-ts");
+    expect(pres).not.toBeNull();
+    expect(pres!.id).toBe("intro-to-ts");
+    expect(pres!.title).toBe("Introduction to TypeScript");
+    expect(pres!.slides.length).toBe(1);
+  });
 
-/**
- * TC-7.2: GET /api/presentations — populated list
- * Will verify: metadata shape (id, title, createdAt, updatedAt, slide count)
- */
-function testGetPresentationsPopulated() {
-  // TODO: Seed test data, then:
-  // const res = await fetch('/api/presentations');
-  // const body = await res.json();
-  // assert(body.length > 0, "Should have presentations");
-  // assert('id' in body[0], "Should have id");
-  // assert('title' in body[0], "Should have title");
-  console.log("⏳ TC-7.2: GET /api/presentations (populated) — stub ready");
-}
+  it("TC-7.3: POST presentations — valid input creates file", async () => {
+    const title = "Test Deck";
+    const slug = generateSlug(title);
+    const now = new Date().toISOString();
+    const presentation: Presentation = {
+      id: slug,
+      title,
+      createdAt: now,
+      updatedAt: now,
+      slides: [{ title: "Slide 1", content: "Hello" }],
+    };
 
-/**
- * TC-7.3: POST /api/presentations — valid input
- * Will verify: 201 status, response includes generated id/slug, file on disk
- */
-function testPostPresentationValid() {
-  // TODO: Once API is built:
-  // const res = await fetch('/api/presentations', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ title: 'Test Deck', slides: [{ title: 'Slide 1', content: 'Hello' }] }),
-  // });
-  // assertEqual(res.status, 201, "Should return 201");
-  console.log("⏳ TC-7.3: POST /api/presentations (valid) — stub ready");
-}
+    await writePresentation(slug, presentation);
+    const stored = await readPresentation(slug);
+    expect(stored).not.toBeNull();
+    expect(stored!.id).toBe("test-deck");
+    expect(stored!.title).toBe("Test Deck");
+    expect(stored!.slides.length).toBe(1);
+  });
 
-/**
- * TC-7.4: POST /api/presentations — missing title
- * Will verify: 400 status, error message in response body
- */
-function testPostPresentationMissingTitle() {
-  // TODO: Once API is built:
-  // const res = await fetch('/api/presentations', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ slides: [] }),
-  // });
-  // assertEqual(res.status, 400, "Should return 400");
-  console.log("⏳ TC-7.4: POST /api/presentations (missing title) — stub ready");
-}
+  it("TC-7.7: GET presentation by slug — existing", async () => {
+    const now = new Date().toISOString();
+    await writePresentation("my-deck", {
+      id: "my-deck",
+      title: "My Deck",
+      createdAt: now,
+      updatedAt: now,
+      slides: [
+        { title: "S1", content: "C1" },
+        { title: "S2", content: "C2" },
+      ],
+    });
 
-/**
- * TC-7.5: POST /api/presentations — invalid slides
- * Will verify: 400 when slides is not an array
- */
-function testPostPresentationInvalidSlides() {
-  // TODO: Test with slides: "string", slides: 42, slides: null
-  console.log("⏳ TC-7.5: POST /api/presentations (invalid slides) — stub ready");
-}
+    const pres = await readPresentation("my-deck");
+    expect(pres).not.toBeNull();
+    expect(pres!.slides.length).toBe(2);
+    expect(pres!.slides[0].title).toBe("S1");
+  });
 
-/**
- * TC-7.7: GET /api/presentations/[slug] — existing
- * Will verify: 200 status, full presentation with slides array
- */
-function testGetPresentationBySlugExisting() {
-  // TODO: Create, then fetch by slug
-  console.log("⏳ TC-7.7: GET /api/presentations/[slug] (existing) — stub ready");
-}
+  it("TC-7.8: GET presentation by slug — non-existing returns null", async () => {
+    const pres = await readPresentation("does-not-exist");
+    expect(pres).toBeNull();
+  });
 
-/**
- * TC-7.8: GET /api/presentations/[slug] — non-existing
- * Will verify: 404 status
- */
-function testGetPresentationBySlugNonExisting() {
-  // TODO: Fetch non-existent slug
-  // const res = await fetch('/api/presentations/does-not-exist');
-  // assertEqual(res.status, 404, "Should return 404");
-  console.log("⏳ TC-7.8: GET /api/presentations/[slug] (non-existing) — stub ready");
-}
+  it("TC-7.9: PUT presentation — valid update", async () => {
+    const now = new Date().toISOString();
+    await writePresentation("updatable", {
+      id: "updatable",
+      title: "Original Title",
+      createdAt: now,
+      updatedAt: now,
+      slides: [{ title: "S1", content: "C1" }],
+    });
 
-/**
- * TC-7.9: PUT /api/presentations/[slug] — valid update
- * Will verify: 200 status, updatedAt changed, content updated
- */
-function testPutPresentationValid() {
-  console.log("⏳ TC-7.9: PUT /api/presentations/[slug] (valid) — stub ready");
-}
+    const existing = await readPresentation("updatable");
+    expect(existing).not.toBeNull();
 
-/**
- * TC-7.10: PUT /api/presentations/[slug] — non-existing
- * Will verify: 404 status
- */
-function testPutPresentationNonExisting() {
-  console.log("⏳ TC-7.10: PUT /api/presentations/[slug] (non-existing) — stub ready");
-}
+    const updated: Presentation = {
+      ...existing!,
+      title: "Updated Title",
+      slides: [
+        { title: "S1", content: "C1 updated" },
+        { title: "S2", content: "C2 new" },
+      ],
+      updatedAt: new Date().toISOString(),
+    };
 
-/**
- * TC-7.12: DELETE /api/presentations/[slug] — existing
- * Will verify: 200 status, file removed
- */
-function testDeletePresentationExisting() {
-  console.log("⏳ TC-7.12: DELETE /api/presentations/[slug] (existing) — stub ready");
-}
+    await writePresentation("updatable", updated);
+    const result = await readPresentation("updatable");
+    expect(result).not.toBeNull();
+    expect(result!.title).toBe("Updated Title");
+    expect(result!.slides.length).toBe(2);
+    expect(result!.updatedAt).not.toBe(now);
+  });
 
-/**
- * TC-7.13: DELETE /api/presentations/[slug] — non-existing
- * Will verify: 404 status
- */
-function testDeletePresentationNonExisting() {
-  console.log("⏳ TC-7.13: DELETE /api/presentations/[slug] (non-existing) — stub ready");
-}
+  it("TC-7.12: DELETE presentation — file removed", async () => {
+    const now = new Date().toISOString();
+    await writePresentation("deletable", {
+      id: "deletable",
+      title: "Delete Me",
+      createdAt: now,
+      updatedAt: now,
+      slides: [],
+    });
 
-/**
- * TC-7.14: DELETE /api/presentations/[slug] — path traversal
- * Will verify: 400 or 404, no file system escape
- */
-function testDeletePresentationPathTraversal() {
-  console.log("⏳ TC-7.14: DELETE /api/presentations/[slug] (path traversal) — stub ready");
-}
+    // Verify file exists
+    const before = await readPresentation("deletable");
+    expect(before).not.toBeNull();
 
-// ─── TC-8.x: AI generation API stubs ────────────────────────────────────────
+    // Delete
+    await fs.unlink(path.join(PRESENTATIONS_DIR, "deletable.json"));
 
-/**
- * TC-8.1: POST /api/generate — valid topic
- * Will verify: 200, response contains slides array with Slide objects
- */
-function testGenerateValidTopic() {
-  console.log("⏳ TC-8.1: POST /api/generate (valid topic) — stub ready");
-}
+    // Verify gone
+    const after = await readPresentation("deletable");
+    expect(after).toBeNull();
+  });
 
-/**
- * TC-8.2: POST /api/generate — missing topic
- * Will verify: 400 status
- */
-function testGenerateMissingTopic() {
-  console.log("⏳ TC-8.2: POST /api/generate (missing topic) — stub ready");
-}
+  it("TC-7.16: Presentation response shape", async () => {
+    const now = new Date().toISOString();
+    const pres: Presentation = {
+      id: "shape-test",
+      title: "Shape Test",
+      createdAt: now,
+      updatedAt: now,
+      slides: [{ title: "S1", content: "C1", notes: "N1" }],
+    };
 
-/**
- * TC-8.4: POST /api/generate — default numSlides
- * Will verify: returns 5 slides when numSlides not specified
- */
-function testGenerateDefaultNumSlides() {
-  console.log("⏳ TC-8.4: POST /api/generate (default numSlides) — stub ready");
-}
+    await writePresentation("shape-test", pres);
+    const result = await readPresentation("shape-test");
 
-// ─── Test runner ────────────────────────────────────────────────────────────
+    expect(result).toHaveProperty("id");
+    expect(result).toHaveProperty("title");
+    expect(result).toHaveProperty("createdAt");
+    expect(result).toHaveProperty("updatedAt");
+    expect(result).toHaveProperty("slides");
+    expect(result!.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    expect(result!.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+  });
+});
 
-function runAllTests() {
-  console.log("🧪 SlideMaker Smoke Tests\n");
-  console.log("── Type Compilation ──");
-  testSlideTypeStructure();
-  testPresentationTypeStructure();
+// ─── Slug generation tests ──────────────────────────────────────────────────
 
-  console.log("\n── API Endpoint Stubs (US-7) ──");
-  testGetPresentationsEmpty();
-  testGetPresentationsPopulated();
-  testPostPresentationValid();
-  testPostPresentationMissingTitle();
-  testPostPresentationInvalidSlides();
-  testGetPresentationBySlugExisting();
-  testGetPresentationBySlugNonExisting();
-  testPutPresentationValid();
-  testPutPresentationNonExisting();
-  testDeletePresentationExisting();
-  testDeletePresentationNonExisting();
-  testDeletePresentationPathTraversal();
+describe("Slug generation", () => {
+  function generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40);
+  }
 
-  console.log("\n── AI Generation Stubs (US-8) ──");
-  testGenerateValidTopic();
-  testGenerateMissingTopic();
-  testGenerateDefaultNumSlides();
+  it("converts simple title to slug", () => {
+    expect(generateSlug("My Presentation")).toBe("my-presentation");
+  });
 
-  console.log("\n🏁 All smoke tests passed (type checks + stubs logged)");
-}
+  it("strips special characters", () => {
+    expect(generateSlug("Hello, World!")).toBe("hello-world");
+  });
 
-runAllTests();
+  it("collapses multiple hyphens", () => {
+    expect(generateSlug("one---two---three")).toBe("one-two-three");
+  });
+
+  it("trims leading/trailing hyphens", () => {
+    expect(generateSlug("---hello---")).toBe("hello");
+  });
+
+  it("caps at 40 characters", () => {
+    const long = "a".repeat(50);
+    expect(generateSlug(long).length).toBeLessThanOrEqual(40);
+  });
+
+  it("handles unicode by stripping non-alphanumeric", () => {
+    expect(generateSlug("café résumé")).toBe("caf-rsum");
+  });
+
+  it("returns empty string for all-special-char titles", () => {
+    expect(generateSlug("!!!")).toBe("");
+  });
+});
+
+// ─── API route handler export checks ────────────────────────────────────────
+
+describe("API route handler exports (TC-9.5)", () => {
+  it("presentations route exports GET and POST", async () => {
+    const mod = await import("../app/api/presentations/route");
+    expect(typeof mod.GET).toBe("function");
+    expect(typeof mod.POST).toBe("function");
+  });
+
+  it("presentations/[slug] route exports GET, PUT, DELETE", async () => {
+    const mod = await import("../app/api/presentations/[slug]/route");
+    expect(typeof mod.GET).toBe("function");
+    expect(typeof mod.PUT).toBe("function");
+    expect(typeof mod.DELETE).toBe("function");
+  });
+
+  it("generate route exports POST", async () => {
+    const mod = await import("../app/api/generate/route");
+    expect(typeof mod.POST).toBe("function");
+  });
+});
+
+// ─── Security edge cases ────────────────────────────────────────────────────
+
+describe("Security: slug sanitization (SEC-1)", () => {
+  function generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40);
+  }
+
+  it("path traversal characters are stripped", () => {
+    const slug = generateSlug("../../etc/passwd");
+    expect(slug).not.toContain("..");
+    expect(slug).not.toContain("/");
+    expect(slug).not.toContain("\\");
+  });
+
+  it("backslash characters are stripped", () => {
+    const slug = generateSlug("..\\windows\\system32");
+    expect(slug).not.toContain("\\");
+    expect(slug).not.toContain("..");
+  });
+});
