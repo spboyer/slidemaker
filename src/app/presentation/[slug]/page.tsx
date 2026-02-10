@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Slide, Presentation } from "@/lib/types";
-import SlideViewer from "@/app/components/SlideViewer";
+import RevealSlideshow, {
+  RevealSlideshowRef,
+} from "@/app/components/RevealSlideshow";
 import SlideNav from "@/app/components/SlideNav";
 import SlideEditor from "@/app/components/SlideEditor";
 import SlideManager from "@/app/components/SlideManager";
 import PresentationChat from "@/app/components/PresentationChat";
+import ThemePicker from "@/app/components/ThemePicker";
 
 export default function PresentationPage() {
   const params = useParams<{ slug: string }>();
@@ -24,6 +27,7 @@ export default function PresentationPage() {
   const [showManager, setShowManager] = useState(false);
   const [showChat, setShowChat] = useState(isNew);
   const [addingSlide, setAddingSlide] = useState(false);
+  const revealRef = useRef<RevealSlideshowRef>(null);
 
   const fetchPresentation = useCallback(async () => {
     try {
@@ -140,6 +144,40 @@ export default function PresentationPage() {
     setCurrentSlideIndex(newSlides.length - 1);
     setEditing(true);
   }, [presentation, savePresentation]);
+
+  const handleThemeChange = useCallback(
+    async (themeId: string) => {
+      if (!presentation) return;
+      try {
+        const res = await fetch(`/api/presentations/${presentation.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slides: presentation.slides, theme: themeId }),
+        });
+        if (res.ok) {
+          const updated: Presentation = await res.json();
+          setPresentation(updated);
+        }
+      } catch (err) {
+        console.error("Failed to save theme:", err);
+      }
+    },
+    [presentation]
+  );
+
+  const handleSlideChanged = useCallback((index: number) => {
+    setCurrentSlideIndex(index);
+  }, []);
+
+  const handleFullscreen = useCallback(() => {
+    const el = document.querySelector(".reveal") as HTMLElement | null;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  }, []);
 
   const handleSaveSlide = (updated: Slide) => {
     if (!presentation) return;
@@ -283,7 +321,10 @@ export default function PresentationPage() {
           <SlideManager
             slides={slides}
             currentIndex={currentSlideIndex}
-            onSelect={(i) => setCurrentSlideIndex(i)}
+            onSelect={(i) => {
+              setCurrentSlideIndex(i);
+              revealRef.current?.goToSlide(i);
+            }}
             onDelete={handleDeleteSlide}
             onMoveUp={handleMoveUp}
             onMoveDown={handleMoveDown}
@@ -300,6 +341,24 @@ export default function PresentationPage() {
           </Link>
           <span className="text-sm font-medium text-white">{presentation.title}</span>
           <div className="flex gap-2">
+            <ThemePicker
+              currentTheme={presentation.theme ?? "night"}
+              onThemeChange={handleThemeChange}
+            />
+            <button
+              onClick={handleFullscreen}
+              className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20"
+              title="Toggle fullscreen (F)"
+            >
+              ⛶
+            </button>
+            <button
+              onClick={() => revealRef.current?.toggleOverview()}
+              className="rounded-md bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20"
+              title="Slide overview (O)"
+            >
+              ▦
+            </button>
             <button
               onClick={() => setShowChat(!showChat)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium text-white transition-colors ${
@@ -323,17 +382,25 @@ export default function PresentationPage() {
           </div>
         </div>
 
-        {/* Slide viewer */}
-        <div className="flex-1 overflow-hidden">
-          <SlideViewer slide={slides[currentSlideIndex]} index={currentSlideIndex} />
+        {/* Slide viewer — reveal.js */}
+        <div className="relative flex-1 overflow-hidden">
+          <RevealSlideshow
+            ref={revealRef}
+            presentation={presentation}
+            startSlide={currentSlideIndex}
+            onSlideChange={handleSlideChanged}
+          />
+          <div className="pointer-events-none absolute bottom-2 right-2 text-[10px] text-white/30">
+            Press S for speaker notes
+          </div>
         </div>
 
         {/* Navigation */}
         <SlideNav
           currentIndex={currentSlideIndex}
           totalSlides={slides.length}
-          onPrevious={() => setCurrentSlideIndex((i) => Math.max(0, i - 1))}
-          onNext={() => setCurrentSlideIndex((i) => Math.min(slides.length - 1, i + 1))}
+          onPrevious={() => revealRef.current?.prev()}
+          onNext={() => revealRef.current?.next()}
           onAddSlide={handleAddSlide}
           onAddBlank={handleAddBlank}
         />
