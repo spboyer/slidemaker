@@ -27,28 +27,21 @@ body {
 
 /*
  * Undo ONLY the specific Tailwind v4 base resets that conflict with reveal.js.
- * Tailwind v4 resets margin, padding, list-style, font, border, and text-decoration.
- * We revert only those properties so reveal.js theme styles are fully preserved.
+ * Tailwind v4 resets margin, padding, list-style, font, border, and text-decoration
+ * via low-specificity selectors (element tags or *). The reveal.js theme CSS at
+ * .reveal specificity (0,1,x) already beats Tailwind's element resets (0,0,x) for
+ * most properties. We only need overrides for cases where Tailwind's reset would
+ * otherwise be the ONLY rule (no theme override exists).
+ *
+ * IMPORTANT: Do NOT use font-size/font-weight/margin revert on headings —
+ * the theme's .reveal h1 rules already beat Tailwind's h1 { font-size: inherit }.
+ * Using revert at .reveal .slides h1 specificity (0,2,1) would override the theme
+ * with UA defaults instead of the theme's custom property values.
  */
 
-/* Headings: Tailwind resets font-size/font-weight/margin via `font: inherit; margin: 0` */
-.reveal .slides h1,
-.reveal .slides h2,
-.reveal .slides h3,
-.reveal .slides h4,
-.reveal .slides h5,
-.reveal .slides h6 {
-  font-size: revert;
-  font-weight: revert;
-  margin: revert;
-}
-
-/* Paragraphs: Tailwind resets margin */
-.reveal .slides p {
-  margin: revert;
-}
-
-/* Lists: Tailwind resets list-style, padding, and margin */
+/* Lists: Tailwind resets list-style via ol,ul { list-style: none } at (0,0,1).
+   Theme sets .reveal ul { list-style-type: disc } at (0,1,1) which already wins.
+   But keep revert for safety in case of CSS load order issues. */
 .reveal .slides ul,
 .reveal .slides ol {
   list-style: revert;
@@ -60,12 +53,13 @@ body {
   margin: revert;
 }
 
-/* Blockquote: Tailwind resets margin */
+/* Blockquote: ensure Tailwind * { margin:0 } doesn't strip theme blockquote margin */
 .reveal .slides blockquote {
   margin: revert;
 }
 
-/* Table elements: Tailwind resets border, padding, margin */
+/* Table elements: Tailwind resets border via * { border: 0 solid } at (0,0,0).
+   Theme sets table border-bottom etc at higher specificity, but keep for completeness. */
 .reveal .slides table {
   border-collapse: revert;
   border-spacing: revert;
@@ -85,7 +79,8 @@ body {
   text-align: revert;
 }
 
-/* Pre/Code: Tailwind resets font-family, font-size, margin */
+/* Pre/Code: Tailwind sets code,pre { font-family: tailwind-mono; font-size: 1em }
+   at (0,0,1). Theme .reveal pre at (0,1,1) wins, but keep for safety. */
 .reveal .slides pre {
   font-family: revert;
   font-size: revert;
@@ -97,7 +92,8 @@ body {
   font-size: revert;
 }
 
-/* Links: Tailwind resets color and text-decoration */
+/* Links: Tailwind resets a { color: inherit; text-decoration: inherit } at (0,0,1).
+   Theme .reveal a at (0,1,1) wins, but keep for safety. */
 .reveal .slides a {
   color: revert;
   text-decoration: revert;

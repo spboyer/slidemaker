@@ -1,48 +1,48 @@
 {
   "id": "untitled-presentation",
   "title": "Untitled Presentation",
-  "createdAt": "2026-02-10T20:59:03.500Z",
-  "updatedAt": "2026-02-10T20:59:03.500Z",
+  "createdAt": "2026-02-10T21:07:37.741Z",
+  "updatedAt": "2026-02-10T21:07:37.741Z",
   "slides": [
     {
       "title": "",
-      "content": "<h1>Demystifying TypeScript</h1><p>The essential guide for developers</p>",
-      "notes": "Welcome the audience to the presentation. Introduce yourself and share the goal of the session: to provide a foundational understanding of TypeScript. Mention the target audience: developers with basic JavaScript knowledge. Spend 1-2 minutes setting the stage for the talk.",
+      "content": "<h1>TypeScript Basics</h1><p>Stronger typing for scalable JavaScript</p>",
+      "notes": "Welcome everyone to this session on TypeScript Basics. We'll explore how TypeScript enhances JavaScript with strong typing and better tooling. This is a 10-minute session aimed at developers who are familiar with JavaScript but new to TypeScript. Quick show of hands: how many of you have used TypeScript before?",
       "transition": "fade",
       "backgroundGradient": "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)",
       "layout": "center"
     },
     {
-      "title": "What is TypeScript?",
-      "content": "<ul><li class=\"fragment fade-up\">A superset of JavaScript</li><li class=\"fragment fade-up\">Adds static typing to JavaScript</li><li class=\"fragment fade-up\">Developed by Microsoft in 2012</li><li class=\"fragment fade-up\">Compiles to plain JavaScript</li></ul>",
-      "notes": "Start with the basics: explain that TypeScript builds on JavaScript. Highlight static typing as its key feature—this helps catch errors early. Mention that it's widely adopted and backed by Microsoft. Spend about 2 minutes here.",
+      "title": "",
+      "content": "<h2>What is TypeScript?</h2><ul><li class=\"fragment fade-up\">A superset of JavaScript</li><li class=\"fragment fade-up\">Adds optional static typing</li><li class=\"fragment fade-up\">Transpiles to plain JavaScript</li><li class=\"fragment fade-up\">Improves developer tooling (e.g., IntelliSense)</li></ul>",
+      "notes": "Spend about 2 minutes on this slide. Explain that TypeScript is still JavaScript at its core, but with extra features like static typing. Highlight that it helps catch errors early during development and improves the developer experience. Use examples like better code completion and refactoring support in IDEs. Transition: 'So how does TypeScript actually look in practice?'",
       "transition": "slide",
       "backgroundColor": "#1a1a2e",
       "layout": "default"
     },
     {
-      "title": "Why Use TypeScript?",
-      "content": "<ul><li class=\"fragment highlight-blue\">Improved developer productivity</li><li class=\"fragment highlight-green\">Catch bugs early with type checking</li><li class=\"fragment fade-up\">Better tooling and autocompletion</li><li class=\"fragment fade-up\">Scales well for large codebases</li></ul>",
-      "notes": "Focus on the benefits of TypeScript that resonate with your audience. Discuss how static typing leads to fewer runtime errors and better collaboration in teams. Highlight modern IDE support for TypeScript, which makes development faster and more efficient. Ask the audience: 'Who here has struggled with a bug that could have been caught by TypeScript?'",
+      "title": "TypeScript Syntax",
+      "content": "<pre><code class=\"language-typescript\" data-trim data-noescape data-line-numbers=\"1-2|4-5|7\">\n// Defining a variable with type\nlet count: number = 10;\n\n// Defining a function with parameter and return types\nfunction greet(name: string): string {\n  return `Hello, ${name}!`;\n}\n\n// Using an interface\ninterface User {\n  id: number;\n  name: string;\n}\n</code></pre>",
+      "notes": "Take 3 minutes to walk through this code. Start with the type annotation for variables — it's simple but powerful for catching errors. Then move to function typing: explain how defining parameter and return types makes the code more predictable and self-documenting. Finally, touch on interfaces for defining object shapes. Encourage the audience to ask questions if they're new to these concepts.",
+      "transition": "fade",
+      "backgroundColor": "#16213e",
+      "layout": "default"
+    },
+    {
+      "title": "",
+      "content": "<h2>Key Benefits of TypeScript</h2><table>\n  <thead>\n    <tr><th>Feature</th><th>Benefit</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>Static Typing</td><td>Catch errors during development</td></tr>\n    <tr class=\"fragment\"><td>Tooling</td><td>Better autocompletion & refactoring</td></tr>\n    <tr class=\"fragment\"><td>Interfaces</td><td>Define clear data structures</td></tr>\n  </tbody>\n</table>",
+      "notes": "Spend about 2 minutes here. Go row by row: Static Typing helps reduce runtime errors — give an example of catching a type mismatch before deployment. Tooling improves developer productivity. Interfaces bring clarity to data shapes, especially in large projects. Transition: 'Finally, let’s summarize why TypeScript is worth adopting.'",
       "transition": "convex",
-      "backgroundGradient": "linear-gradient(135deg, #16213e 0%, #0f3460 50%, #0c0c1d 100%)",
+      "backgroundColor": "#0f3460",
       "layout": "default"
     },
     {
-      "title": "TypeScript in Action",
-      "content": "<pre><code class=\"language-typescript\" data-trim data-noescape data-line-numbers=\"1-2|3-4\">\n// Define a type\ninterface User {\n  name: string;\n  age: number;\n}\n\n// Use the type\nconst welcomeUser = (user: User): string => {\n  return `Welcome, ${user.name}, age ${user.age}!`;\n}\n</code></pre>",
-      "notes": "Walk through the code step by step. First, explain what an interface is and how it defines the shape of an object. Then, show how the function uses the 'User' type, ensuring that 'name' is a string and 'age' is a number. Highlight how this helps catch errors during development. Spend around 3 minutes here.",
-      "transition": "zoom",
-      "backgroundColor": "#0c0c1d",
-      "layout": "default"
-    },
-    {
-      "title": "Key Takeaways",
-      "content": "<ul><li class=\"fragment fade-up\">TypeScript enhances JavaScript with static typing</li><li class=\"fragment fade-up\">It improves code quality and maintainability</li><li class=\"fragment fade-up\">Adopting TypeScript is simple and worth it!</li><li class=\"fragment fade-up\">Start small—convert one file at a time</li></ul>",
-      "notes": "Summarize the key points of the presentation. Reinforce the benefits of TypeScript and encourage the audience to try it out. Suggest starting with a small project or converting a single JavaScript file to TypeScript. End with a call to action: 'Give it a shot!' Spend 2 minutes wrapping up, and open the floor for questions if time allows.",
-      "transition": "concave",
-      "backgroundGradient": "linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #0c0c1d 100%)",
-      "layout": "default"
+      "title": "",
+      "content": "<h2>Why TypeScript? 🚀</h2><ul><li class=\"fragment fade-up\">Fewer bugs in production</li><li class=\"fragment fade-up\">Improved team collaboration</li><li class=\"fragment fade-up\">Scalable for large projects</li><li class=\"fragment fade-up\">Seamless integration with JavaScript</li></ul>",
+      "notes": "Wrap up the session with a 2-minute overview of why TypeScript matters. Emphasize fewer bugs leading to happier users and how static typing provides a shared understanding across the team. Mention that TypeScript scales well even for enterprise-level applications and can be gradually adopted in existing JavaScript projects. End by thanking the audience and inviting questions.",
+      "transition": "fade",
+      "backgroundGradient": "linear-gradient(135deg, #2d1b69 0%, #8b2252 50%, #e84545 100%)",
+      "layout": "center"
     }
   ]
 }

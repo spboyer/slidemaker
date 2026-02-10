@@ -125,7 +125,7 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
     const deckRef = useRef<any>(null);
     const [ready, setReady] = useState(false);
 
-    const theme = presentation.theme ?? "night";
+    const theme = presentation.theme ?? "black";
     const transition = presentation.transition ?? "slide";
 
     // Expose imperative API

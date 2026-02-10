@@ -359,7 +359,7 @@ export default function PresentationPage() {
           <span className="text-sm font-medium text-white">{presentation.title}</span>
           <div className="flex gap-2">
             <ThemePicker
-              currentTheme={presentation.theme ?? "night"}
+              currentTheme={presentation.theme ?? "black"}
               onThemeChange={handleThemeChange}
             />
             <button

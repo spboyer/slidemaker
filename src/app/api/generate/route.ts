@@ -13,10 +13,10 @@ const VALID_STYLES: PresentationStyle[] = [
 ];
 
 const STYLE_INSTRUCTIONS: Record<PresentationStyle, string> = {
-  professional: `Tone: formal and polished. Clean layouts, concise bullets (3-5 max), business language. Use "fade" or "slide" transitions. Prefer dark gradient backgrounds on cover/section slides, clean white/light on content slides. Suggest theme: "white", "simple", or "serif". NEVER suggest "beige".`,
-  creative: `Tone: bold and visually striking. Use varied layouts (center, two-column), vivid gradient backgrounds, and dynamic transitions like "zoom" or "convex". Use emoji accents (✅ ⚡ 🔄 🚀) for visual flair. Include at least one impact slide and one quote slide. Suggest theme: "moon", "blood", or "league". NEVER suggest "beige".`,
-  minimal: `Tone: clean and understated. Short punchy text (2-3 lines max per slide), lots of whitespace, "fade" transitions only. Use impact slides generously — single statements that breathe. Light backgrounds with occasional dark section dividers. Suggest theme: "white", "simple", or "sky". NEVER suggest "beige".`,
-  technical: `Tone: precise and detail-oriented. Use code blocks with data-line-numbers frequently, include comparison tables, and prefer "slide" or "none" transitions. Use dark theme backgrounds for code slides. Include at least 2 code slides with step-through highlighting. Suggest theme: "night", "black", or "moon". NEVER suggest "beige".`,
+  professional: `Tone: formal and polished. Clean layouts, concise bullets (3-5 max), business language. Use "fade" or "slide" transitions. Prefer dark gradient backgrounds on cover/section slides, clean white/light on content slides. Suggest theme: "black". NEVER suggest "beige".`,
+  creative: `Tone: bold and visually striking. Use varied layouts (center, two-column), vivid gradient backgrounds, and dynamic transitions like "zoom" or "convex". Use emoji accents (✅ ⚡ 🔄 🚀) for visual flair. Include at least one impact slide and one quote slide. Suggest theme: "black", "moon", or "league". NEVER suggest "beige".`,
+  minimal: `Tone: clean and understated. Short punchy text (2-3 lines max per slide), lots of whitespace, "fade" transitions only. Use impact slides generously — single statements that breathe. Light backgrounds with occasional dark section dividers. Suggest theme: "black" or "simple". NEVER suggest "beige".`,
+  technical: `Tone: precise and detail-oriented. Use code blocks with data-line-numbers frequently, include comparison tables, and prefer "slide" or "none" transitions. Use dark theme backgrounds for code slides. Include at least 2 code slides with step-through highlighting. Suggest theme: "black", "night", or "moon". NEVER suggest "beige".`,
 };
 
 const AVAILABLE_THEMES = REVEAL_THEMES.map((t) => t.id).join(", ");
@@ -24,7 +24,7 @@ const AVAILABLE_THEMES = REVEAL_THEMES.map((t) => t.id).join(", ");
 const SYSTEM_PROMPT = `You are an expert reveal.js presentation designer who creates conference-quality decks. Your slides should look like the official revealjs.com demo — dramatic, clean, and visually impressive.
 
 Return a JSON object with:
-- "suggestedTheme": string — one of: ${AVAILABLE_THEMES}. NEVER suggest "beige" (it looks dated). For technical topics prefer "night", "black", or "moon". For business prefer "white", "simple", or "serif". For creative prefer "league", "sky", or "solarized".
+- "suggestedTheme": string — one of: ${AVAILABLE_THEMES}. Default to "black" unless the user explicitly requests a different theme. NEVER suggest "beige" (it looks dated). For technical topics prefer "black", "night", or "moon". For business prefer "black", "white", or "simple". For creative prefer "black", "league", or "sky".
 - "slides": array of slide objects
 
 Each slide object must have:
