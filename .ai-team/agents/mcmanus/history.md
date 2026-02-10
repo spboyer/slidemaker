@@ -51,3 +51,4 @@
 - `.env.local.example` updated — `OPENAI_API_KEY` replaced with `GITHUB_TOKEN` instructions (commented out by default since local dev auto-detects).
 - Build and all 23 tests pass after changes.
 - Branch: `squad/12-github-models-api`
+📌 Team update (2026-02-10): Never include secrets in GitHub issues, PRs, or repo content — directive by Shayne Boyer
