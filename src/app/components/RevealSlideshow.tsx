@@ -247,11 +247,14 @@ const RevealSlideshow = forwardRef<RevealSlideshowRef, RevealSlideshowProps>(
     }, [transition]);
 
     // Sync slides when content changes (without full re-init)
+    const slidesJson = JSON.stringify(presentation.slides);
+    const prevSlidesJson = useRef(slidesJson);
     useEffect(() => {
-      if (deckRef.current && ready) {
+      if (deckRef.current && ready && slidesJson !== prevSlidesJson.current) {
+        prevSlidesJson.current = slidesJson;
         deckRef.current.sync();
       }
-    }, [presentation.slides, ready]);
+    }, [slidesJson, ready]);
 
     return (
       <div
