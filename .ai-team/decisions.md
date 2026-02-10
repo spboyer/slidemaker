@@ -327,3 +327,47 @@ Called from:
 - After `deck.sync()` in the content-change effect — handles dynamically added code blocks
 
 **Impact:** Code blocks now show full syntax highlighting with Monokai theme colors, line numbers, and fragment-based line highlighting steps. No new dependencies — uses the plugin's own bundled hljs instance. Build passes, 50 unit tests pass, 34 e2e tests pass.
+
+---
+
+### Slide Area Polish — Compact Chrome, Fragment Visibility, Control Colors
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Status:** Implemented
+
+Three visual gaps identified via Playwright screenshot comparison against revealjs.com demo:
+
+**1. Compact Chrome (Gap 1 — Scale Factor)**
+- Top bar: `px-4 py-2` → `px-3 py-1`, link text shortened to icon "←", title truncated with `truncate`
+- SlideNav: `px-6 py-4` → `px-3 py-1.5`, buttons reduced from `rounded-lg px-5 py-2 text-sm` to `rounded px-3 py-1 text-xs`, prev/next text replaced with arrow icons only, "AI Slide"→"AI", labels shortened
+- Combined savings: ~50px vertical space recovered for the slide container
+- Because `embedded: true` in Reveal config, the deck scales to fit its container — taller container = better scale factor
+
+**2. Fragment Visibility in Editor (Gap 2)**
+- Chose **Option B**: CSS-only fix in `globals.css`
+- Rule: `.reveal.embedded .slides .fragment:not(.visible) { opacity: 1; visibility: inherit; }`
+- Fragments show as visible content in embedded editor mode
+- Fragment animations preserved in fullscreen presentation mode (not embedded)
+- No changes to RevealSlideshow component or Reveal configuration
+
+**3. Navigation Control Colors (Gap 3)**
+- `.reveal .controls { color: var(--r-link-color, #42affa) !important; }` — uses theme's link color
+- `.reveal .progress { color: var(--r-link-color, #42affa); }` — progress bar matches
+
+**Additional:**
+- Speaker notes hint moved from bottom-right to top-right (avoids overlap with reveal.js controls), text shortened to "S = notes"
+
+**Files changed:** `src/app/globals.css`, `src/app/components/SlideNav.tsx`, `src/app/presentation/[slug]/page.tsx`
+
+**Verified:** Build passes, 50 unit tests pass, 34 Playwright e2e tests pass.
+
+---
+
+### CSS: Cap h1 Font Size for Proportional Titles
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10
+
+**Problem:** The reveal.js black theme sets `--r-heading1-size: 2.5em` which at 42px base = 105px. Short titles like "REVEAL.JS" look fine, but multi-word titles like "UNDERSTANDING TYPESCRIPT BASICS" fill the entire slide, wrapping to 2 lines and pushing the subtitle off-screen.
+
+**Fix:** Added `.reveal .slides section h1 { font-size: min(var(--r-heading1-size, 2.5em), 2em); }` to `globals.css`. This caps h1 at 2em (84px at 42px base) — proportional like the revealjs.com demo title at ~72px. The `min()` function respects theme custom properties while enforcing a ceiling.
+
+**Showcase presentation updated:** Replaced the 5-slide `untitled-presentation.json` with a new version featuring a short 1-word h1 title ("TypeScript"), proper `class="language-typescript"` on code blocks for syntax highlighting, a comparison table, and a closing slide using h2. Designed to look proportional at any h1 size.
+
+**Verified:** Build passes, 50 unit tests pass, 34 Playwright e2e tests pass.

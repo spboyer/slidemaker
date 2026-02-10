@@ -28,3 +28,5 @@
 📌 Team update (2026-02-10): Console error detection e2e tests added — `page.on('pageerror')` catches uncaught JS errors during Playwright runs — decided by Fenster
 📌 Team update (2026-02-10): Default theme locked to "black" with slide transition — matches revealjs.com demo, CSS heading specificity fixed — decided by Verbal (directive by Shayne Boyer)
 📌 Team update (2026-02-10): Three CSS rendering fixes — viewport bg/color !important override, code block font-size/styling fix, hljs post-render re-highlighting — verified via Playwright computed styles — decided by Verbal
+📌 Team update (2026-02-10): Slide area polish — compact chrome (~50px saved), fragment visibility in embedded mode, nav control colors via --r-link-color — decided by Verbal
+📌 Team update (2026-02-10): h1 font-size capped at min(2.5em, 2em), showcase presentation updated with TypeScript content — decided by Verbal
