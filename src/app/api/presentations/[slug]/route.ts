@@ -1,23 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 import type { Presentation, Slide, SlideTransition } from "@/lib/types";
+import { getStorage } from "@/lib/storage";
 
-const PRESENTATIONS_DIR = path.join(process.cwd(), "presentations");
-
-function getFilePath(slug: string): string {
-  return path.join(PRESENTATIONS_DIR, `${slug}.json`);
-}
-
-async function readPresentation(slug: string): Promise<Presentation | null> {
-  try {
-    const filePath = getFilePath(slug);
-    const data = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(data) as Presentation;
-  } catch {
-    return null;
-  }
-}
+const DEFAULT_USER = "local";
 
 export async function GET(
   _request: NextRequest,
@@ -25,7 +10,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const presentation = await readPresentation(slug);
+    const storage = getStorage();
+    const presentation = await storage.getPresentation(DEFAULT_USER, slug);
 
     if (!presentation) {
       return NextResponse.json(
@@ -50,7 +36,8 @@ export async function PUT(
 ) {
   try {
     const { slug } = await params;
-    const existing = await readPresentation(slug);
+    const storage = getStorage();
+    const existing = await storage.getPresentation(DEFAULT_USER, slug);
 
     if (!existing) {
       return NextResponse.json(
@@ -84,8 +71,7 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     };
 
-    const filePath = getFilePath(slug);
-    await fs.writeFile(filePath, JSON.stringify(updated, null, 2), "utf-8");
+    await storage.savePresentation(DEFAULT_USER, slug, updated);
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -103,18 +89,16 @@ export async function DELETE(
 ) {
   try {
     const { slug } = await params;
-    const filePath = getFilePath(slug);
+    const storage = getStorage();
+    const deleted = await storage.deletePresentation(DEFAULT_USER, slug);
 
-    try {
-      await fs.access(filePath);
-    } catch {
+    if (!deleted) {
       return NextResponse.json(
         { error: "Presentation not found" },
         { status: 404 }
       );
     }
 
-    await fs.unlink(filePath);
     return NextResponse.json({ message: "Presentation deleted" });
   } catch (error) {
     console.error("Error deleting presentation:", error);

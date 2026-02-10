@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-import type { Presentation, Slide } from "@/lib/types";
+import type { Slide } from "@/lib/types";
+import { getStorage } from "@/lib/storage";
 
-const PRESENTATIONS_DIR = path.join(process.cwd(), "presentations");
+const DEFAULT_USER = "local";
 
 function generateSlug(title: string): string {
   return title
@@ -15,30 +14,10 @@ function generateSlug(title: string): string {
     .slice(0, 40);
 }
 
-async function ensureDir() {
-  await fs.mkdir(PRESENTATIONS_DIR, { recursive: true });
-}
-
 export async function GET() {
   try {
-    await ensureDir();
-    const files = await fs.readdir(PRESENTATIONS_DIR);
-    const jsonFiles = files.filter((f) => f.endsWith(".json"));
-
-    const presentations = await Promise.all(
-      jsonFiles.map(async (file) => {
-        const filePath = path.join(PRESENTATIONS_DIR, file);
-        const data = JSON.parse(await fs.readFile(filePath, "utf-8")) as Presentation;
-        return {
-          id: data.id,
-          title: data.title,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-          slideCount: data.slides.length,
-        };
-      })
-    );
-
+    const storage = getStorage();
+    const presentations = await storage.listPresentations(DEFAULT_USER);
     return NextResponse.json(presentations);
   } catch (error) {
     console.error("Error listing presentations:", error);
@@ -77,10 +56,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await ensureDir();
-
     const now = new Date().toISOString();
-    const presentation: Presentation = {
+    const presentation = {
       id: slug,
       title: body.title,
       createdAt: now,
@@ -88,8 +65,8 @@ export async function POST(request: NextRequest) {
       slides,
     };
 
-    const filePath = path.join(PRESENTATIONS_DIR, `${slug}.json`);
-    await fs.writeFile(filePath, JSON.stringify(presentation, null, 2), "utf-8");
+    const storage = getStorage();
+    await storage.savePresentation(DEFAULT_USER, slug, presentation);
 
     return NextResponse.json(presentation, { status: 201 });
   } catch (error) {
