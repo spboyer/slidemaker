@@ -40,3 +40,4 @@
 
 📌 Team update (2026-02-10): Test plan created with 40+ cases; security cases SEC-1–SEC-4 documented — ensure slug sanitization for path traversal — decided by Fenster
 📌 Team update (2026-02-10): SlideViewer/SlideNav components built for #2; will switch from sample data to API fetch when #7 is ready — decided by Verbal
+📌 Team update (2026-02-10): Vitest installed with 23 passing tests — `npm run test` available, CRUD integration tests use temp dirs — decided by Fenster

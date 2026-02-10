@@ -13,3 +13,5 @@
 
 📌 Team update (2026-02-10): CRUD API (#8) and AI generation API (#7) are complete — use `getOpenAIClient()` factory, slugs max 40 chars, `await params` for Next.js 16 dynamic routes — decided by McManus
 - **2026-02-10 — Issues #1, #4 (AI chat sidebar, add slides):** Created `PresentationChat.tsx` (collapsible right-side chat panel with message history, loading states, auto-scroll). Updated `SlideNav.tsx` with optional `onAddSlide`/`onAddBlank` callbacks and buttons. Rewrote `presentation/[slug]/page.tsx` to handle `/presentation/new` route (chat open by default, creates presentation via POST on first generation, replaces URL with real slug). Existing presentations get AI Chat toggle, "AI Slide" (calls generate with numSlides=1), and "Blank" add buttons in nav bar. All state changes auto-save via PUT. Build passes cleanly.
+
+📌 Team update (2026-02-10): Vitest installed with 23 passing tests — `npm run test` available, covers types, CRUD, slugs, API exports, security — decided by Fenster

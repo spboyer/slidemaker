@@ -72,7 +72,7 @@ All API routes return JSON errors with appropriate HTTP status. OpenAI 429 → 4
 - SlideViewer receives a single `Slide` + `index` — pure presentational, parent owns state.
 - Gradient rotation: 8 presets cycle by slide index.
 - Keyboard navigation lives in SlideNav via `useEffect` keydown listener with `useCallback`.
-- Sample slides hardcoded; will switch to API fetch when #7 is ready.
+- Initial sample slides replaced by API fetch after #7 completed.
 - `prose prose-invert` for markdown — Tailwind v4 includes typography utilities natively.
 
 ---
@@ -82,6 +82,44 @@ All API routes return JSON errors with appropriate HTTP status. OpenAI 429 → 4
 
 - Test plan covers all 9 user stories with 40+ test cases in `src/__tests__/test-plan.md`.
 - Naming: `TC-{US}.{seq}`. Priority: P0 (build & CRUD basics), P1 (core API), P2 (UI & security).
-- No test runner yet — smoke test uses plain `assert`, structured for vitest/jest migration.
+- Test runner: Vitest (see "Vitest Test Infrastructure" below).
 - API tests (US-7: 17 cases, US-8: 8 cases) are primary validation target.
 - Security cases: path traversal (SEC-1), XSS (SEC-2), large payloads (SEC-3), API key leakage (SEC-4). McManus should ensure slug sanitization.
+
+---
+
+### Editor, Slide Management & Landing Page
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issues:** #3, #5, #6
+
+- SlideEditor uses side-by-side layout — edit panel left, live SlideViewer preview right (stacks vertically on mobile via `lg:flex-row`).
+- SlideManager is a toggle-able sidebar panel with move-up/move-down buttons for reorder (no DnD library).
+- Auto-save on every action — edits, reorder, delete all persist immediately via `PUT /api/presentations/{slug}`.
+- Landing page uses PresentationList client component fetching from `GET /api/presentations` on mount.
+- `/presentation/new` redirects to `/` — creation flow handled by PresentationChat component.
+- `window.confirm()` for destructive actions (presentation delete, slide delete).
+
+---
+
+### Chat Sidebar & Add Slide Integration
+**Author:** Verbal (Frontend Dev) · **Date:** 2026-02-10 · **Issues:** #1, #4
+
+- `PresentationChat.tsx` is a stateless chat component: receives `existingSlides` and `onSlidesGenerated` callback. Parent page owns all presentation state and persistence logic.
+- `/presentation/new` route is handled by the same `[slug]/page.tsx` — when `slug === "new"`, chat opens by default; on first AI generation, the page POSTs to `/api/presentations` and uses `router.replace()` to switch to the real slug URL.
+- `SlideNav` buttons (`onAddSlide`, `onAddBlank`) are optional props — backward compatible; existing usages without them render the original nav without buttons.
+- "AI Slide" button calls `POST /api/generate` with `{ topic: presentationTitle, numSlides: 1, existingSlides }` and appends the result.
+- "Blank" button appends `{ title: "New Slide", content: "" }` and opens editor mode.
+- All mutations (add slide, chat-generated, blank) auto-save via PUT to the existing presentation.
+
+---
+
+### Vitest Test Infrastructure
+**Author:** Fenster (Tester) · **Date:** 2026-02-10 · **Issue:** #9
+
+- Vitest installed as dev dependency (`npm install -D vitest`).
+- Config in `vitest.config.ts` with `@` path alias matching `tsconfig.json`.
+- Test script: `"test": "vitest run"` in package.json.
+- Tests in `src/__tests__/smoke.test.ts` — 23 tests, all passing.
+- CRUD integration tests use isolated temp directories (not the real `presentations/` dir) with `afterAll` cleanup.
+- API route handler functions are verified as importable and callable — full HTTP-level testing would require `next/test` or a running dev server.
+- Slug generation is tested at unit level including SEC-1 path traversal checks.
+- Build, lint, and TypeScript compilation all pass cleanly.

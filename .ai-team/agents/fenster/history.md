@@ -23,3 +23,6 @@
 - **2026-02-10:** vitest.config.ts uses `@` path alias matching tsconfig. Tests run in ~700ms. CRUD integration tests use temp dirs with cleanup to avoid polluting real data.
 - **2026-02-10:** API route handlers (GET/POST for `/api/presentations`, GET/PUT/DELETE for `/api/presentations/[slug]`, POST for `/api/generate`) are confirmed exported and callable as functions. Full HTTP-level integration tests would require running a dev server or using Next.js test utilities.
 - **2026-02-10:** Slug generation sanitizes path traversal (`../`, `..\\`) by stripping non-alphanumeric characters — SEC-1 verified at unit level.
+
+📌 Team update (2026-02-10): Editor (#3), slide management (#5), landing page (#6) complete — auto-save via PUT, side-by-side editor layout, PresentationList client component — decided by Verbal
+📌 Team update (2026-02-10): Chat sidebar (#1) and add-slide (#4) complete — PresentationChat component, SlideNav add buttons, `/presentation/new` flow — decided by Verbal
