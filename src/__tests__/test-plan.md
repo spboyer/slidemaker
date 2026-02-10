@@ -128,6 +128,52 @@ Not yet installed. Test cases are defined structurally. We will add **vitest** (
 | **TC-9.5** | API endpoints return valid JSON | All API routes return parseable JSON responses | Empty database state |
 | **TC-9.6** | TypeScript compilation | `npx tsc --noEmit` exits 0 | After all source files added |
 
+### US-10: Storage Abstraction ⭐ (Phase 2)
+
+| ID | Description | Expected Behavior | Edge Cases |
+|----|-------------|-------------------|------------|
+| **TC-10.1** | LocalFileStorage reads/writes presentations correctly | `save()` writes JSON to disk, `get()` reads it back with identical data | Missing presentations dir (auto-create), corrupted JSON |
+| **TC-10.2** | LocalFileStorage list returns all presentations | `list()` returns metadata for every `.json` file in the storage dir | Empty dir, non-JSON files mixed in |
+| **TC-10.3** | LocalFileStorage delete removes file | `delete()` removes the file, subsequent `get()` returns null/throws | Delete non-existent file |
+| **TC-10.4** | Factory returns LocalFileStorage when no Azure config | `createStorage()` returns `LocalFileStorage` instance when `AZURE_STORAGE_CONNECTION_STRING` is unset | Env var empty string vs undefined |
+| **TC-10.5** | Factory returns BlobStorage when AZURE_STORAGE_CONNECTION_STRING set | `createStorage()` returns `BlobStorage` instance when connection string is configured | Invalid connection string |
+
+### US-11: Authentication (GitHub OAuth) ⭐ (Phase 2)
+
+| ID | Description | Expected Behavior | Edge Cases |
+|----|-------------|-------------------|------------|
+| **TC-11.1** | Unauthenticated API request returns 401 | When OAuth is configured (`AUTH_GITHUB_ID` set), API calls without credentials return 401 | Missing header vs empty header |
+| **TC-11.2** | Valid session allows API access | Authenticated request with valid session cookie proceeds normally | Expired session, tampered cookie |
+| **TC-11.3** | Local dev bypass — no auth required when AUTH_GITHUB_ID not set | When `AUTH_GITHUB_ID` is not configured, all API requests proceed without auth | Partial config (ID set but no secret) |
+| **TC-11.4** | Bearer token with valid GitHub token succeeds | `Authorization: Bearer <valid_token>` passes auth middleware | Token with extra whitespace |
+| **TC-11.5** | Bearer token with invalid token returns 401 | `Authorization: Bearer <invalid>` returns 401 JSON error | Malformed bearer header, expired token |
+| **TC-11.6** | Rate limiting returns 429 after threshold | Exceeding rate limit returns 429 with `Retry-After` header | Burst requests, reset after window |
+
+### US-12: CORS Middleware ⭐ (Phase 2)
+
+| ID | Description | Expected Behavior | Edge Cases |
+|----|-------------|-------------------|------------|
+| **TC-12.1** | OPTIONS preflight returns correct headers | Preflight response includes `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers` | Custom headers in request |
+| **TC-12.2** | API responses include CORS headers | Non-preflight API responses include `Access-Control-Allow-Origin` | Responses with errors (4xx, 5xx) still have CORS headers |
+| **TC-12.3** | Dev mode allows all origins | When `NODE_ENV=development`, `Access-Control-Allow-Origin: *` is set | Production mode restricts origins |
+
+### US-13: Copilot Extension ⭐ (Phase 2)
+
+| ID | Description | Expected Behavior | Edge Cases |
+|----|-------------|-------------------|------------|
+| **TC-13.1** | Skillset endpoint accepts valid invocation | POST to skillset endpoint with valid payload returns 200 | Missing fields in payload |
+| **TC-13.2** | Returns presentation link in response | Response body contains a URL to the created presentation | Presentation creation fails |
+| **TC-13.3** | Handles missing topic | Request without topic field returns appropriate error | Empty string topic, null topic |
+
+### US-14: MCP Server ⭐ (Phase 2)
+
+| ID | Description | Expected Behavior | Edge Cases |
+|----|-------------|-------------------|------------|
+| **TC-14.1** | `create_presentation` tool works | MCP tool creates a presentation and returns its metadata | Duplicate title, missing required fields |
+| **TC-14.2** | `list_presentations` tool works | MCP tool returns array of all presentations | Empty list, large number of presentations |
+| **TC-14.3** | `get_presentation` tool works | MCP tool returns full presentation by slug | Non-existent slug |
+| **TC-14.4** | `delete_presentation` tool works | MCP tool deletes presentation and confirms removal | Delete non-existent presentation |
+
 ---
 
 ## 3. Security Considerations
@@ -175,5 +221,5 @@ Not yet installed. Test cases are defined structurally. We will add **vitest** (
 ## 5. Priority
 
 1. **P0 (Must test first):** TC-9.1, TC-9.6, TC-7.1–TC-7.8, TC-7.12–TC-7.13
-2. **P1 (Core functionality):** TC-7.9–TC-7.11, TC-8.1–TC-8.4, TC-7.14–TC-7.17
-3. **P2 (Extended):** TC-8.5–TC-8.8, TC-1.x–TC-6.x, SEC-1–SEC-4
+2. **P1 (Core functionality):** TC-7.9–TC-7.11, TC-8.1–TC-8.4, TC-7.14–TC-7.17, TC-10.1–TC-10.5, TC-11.1–TC-11.3, TC-12.1–TC-12.3
+3. **P2 (Extended):** TC-8.5–TC-8.8, TC-1.x–TC-6.x, SEC-1–SEC-4, TC-11.4–TC-11.6, TC-13.1–TC-13.3, TC-14.1–TC-14.4
