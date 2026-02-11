@@ -13,6 +13,7 @@ How to decide who handles what.
 | Testing | Fenster | Write tests, find edge cases, verify fixes |
 | Scope & priorities | Keyser | What to build next, trade-offs, decisions |
 | Session logging | Scribe | Automatic — never needs routing |
+| Bug fixes, small features, docs | @copilot 🤖 | Autonomous — assigned via issues, creates branch + PR |
 
 ## Issue Routing
 

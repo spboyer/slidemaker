@@ -17,6 +17,15 @@
 | McManus | Backend Dev | `.ai-team/agents/mcmanus/charter.md` | ✅ Active |
 | Fenster | Tester | `.ai-team/agents/fenster/charter.md` | ✅ Active |
 | Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
+| @copilot | Coding Agent | — | 🤖 Coding Agent |
+
+<!-- copilot-auto-assign: true -->
+
+### Capabilities
+
+🟢 Good fit: Bug fixes, test coverage, lint fixes, dependency updates, small features, scaffolding, doc fixes
+🟡 Needs review: Medium features with clear specs, refactoring with tests, API additions
+🔴 Not suitable: Architecture decisions, multi-system design, ambiguous requirements, security-critical changes
 
 ## Project Context
 
