@@ -18,6 +18,8 @@ AI-powered slide presentation builder. Describe a topic, get a polished reveal.j
 - **JSON Storage** — Presentations stored as version-control-friendly JSON files
 - **GitHub OAuth** — Sign in with GitHub, with dev mode bypass for local development
 - **Copilot Extension** — Generate presentations from GitHub Copilot Chat with `/slidemaker`
+- **Copilot Coding Agent** — Autonomous issue resolution with @copilot via `squad:copilot` labels
+- **Squad AI Team** — Collaborative development with specialized AI agents (Lead, Frontend, Backend, Tester)
 - **MCP Server** — Expose presentations as tools for Claude, Copilot CLI, and VS Code
 - **Docker & Azure Deployment** — Containerized app with Bicep IaC for Azure Container Apps
 
@@ -220,6 +222,66 @@ Type `/slidemaker <topic>` in any GitHub Copilot Chat window to generate a full 
 ### Installation
 
 Follow the step-by-step guide in [docs/copilot-extension-setup.md](docs/copilot-extension-setup.md) to register the extension with your GitHub organization.
+
+## 🤖 Copilot Coding Agent
+
+SlideМaker integrates with GitHub Copilot's coding agent for autonomous issue resolution. When an issue is labeled with `squad:copilot`, the coding agent automatically picks it up, creates a branch, and opens a PR with the fix.
+
+### How It Works
+
+1. **Label an issue** with `squad:copilot` to assign it to the coding agent
+2. **Automatic pickup** — The agent reads the issue, analyzes the code, and creates a fix
+3. **Branch & PR** — Opens a `copilot/*` branch with a draft PR for review
+4. **Review as usual** — Treat the PR like any team member's work
+
+### Configuration
+
+The coding agent uses:
+- **Workflow setup:** [.github/copilot-setup-steps.yml](.github/copilot-setup-steps.yml) — Build and test steps for the agent's environment
+- **Instructions:** [.github/copilot-instructions.md](.github/copilot-instructions.md) — Project context, conventions, and architecture notes
+- **Auto-assignment:** [.github/workflows/squad-issue-assign.yml](.github/workflows/squad-issue-assign.yml) — Triggers agent assignment when `squad:copilot` label is applied
+
+The agent follows the project's existing conventions, runs tests, and validates changes before opening PRs.
+
+## 👥 Squad AI Team
+
+SlideМaker uses a Squad AI team for collaborative development in GitHub Copilot sessions. The team consists of specialized agents (Lead, Frontend, Backend, Tester) with distinct roles, plus the coding agent for autonomous work.
+
+### How It Works
+
+The Squad team uses a label-based triage system:
+
+1. **Add the `squad` label** to any issue
+2. **Automatic triage** — The Lead agent analyzes the issue and assigns it to the best team member
+3. **Member-specific labels** — Issues get tagged with `squad:{member}` (e.g., `squad:keyser`, `squad:copilot`)
+4. **Work pickup** — In Copilot sessions, address the assigned member by name to start work
+
+### Team Configuration
+
+- **Team roster:** [.ai-team/team.md](.ai-team/team.md) — Lists all squad members and their roles
+- **Agent configs:** [.github/agents/squad.agent.md](.github/agents/squad.agent.md) — Full team orchestration and member definitions
+- **Label sync:** [.github/workflows/sync-squad-labels.yml](.github/workflows/sync-squad-labels.yml) — Auto-creates labels when roster changes
+- **Triage workflow:** [.github/workflows/squad-triage.yml](.github/workflows/squad-triage.yml) — Routes issues to the right member
+
+### Available Members
+
+| Member | Role | Capability |
+|--------|------|------------|
+| **Keyser** | Lead | Architecture, decisions, code review |
+| **Verbal** | Frontend Dev | React, UI, components |
+| **McManus** | Backend Dev | APIs, database, services |
+| **Fenster** | Tester | Tests, quality, edge cases |
+| **@copilot** | Coding Agent | Autonomous bug fixes and small features |
+
+### Coding Agent Capability Profile
+
+The coding agent handles different types of work based on complexity:
+
+- 🟢 **Good fit:** Bug fixes, test coverage, lint fixes, dependency updates, small features, scaffolding, doc fixes
+- 🟡 **Needs review:** Medium features with clear specs, refactoring with tests, API additions  
+- 🔴 **Not suitable:** Architecture decisions, multi-system design, ambiguous requirements, security-critical changes
+
+Issues in the yellow/red zones may be triaged to squad members instead of @copilot, or will receive extra human review if assigned to the agent.
 
 ## 🔧 MCP Server
 
