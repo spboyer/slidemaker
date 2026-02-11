@@ -46,3 +46,5 @@
 
 📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
 📌 Team update (2026-02-11): Token audit completed — no real tokens found in git history, placeholder in docs/mcp-setup.md cleaned up — decided by McManus
+
+📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus

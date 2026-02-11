@@ -32,3 +32,5 @@
 📌 Team update (2026-02-10): h1 font-size capped at min(2.5em, 2em), showcase presentation updated with TypeScript content — decided by Verbal
 
 📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
+
+📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus

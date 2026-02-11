@@ -108,3 +108,13 @@
 📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
 📌 Team update (2026-02-11): Copilot Extension registration docs and copilot-extension.json added — docs only, no code changes — decided by Keyser
 📌 Team update (2026-02-11): MCP client config files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser
+
+### 2026-02-11 — Copilot Coding Agent Setup
+- Created `.github/copilot-setup-steps.yml` — the GitHub-required workflow that runs when the Copilot coding agent picks up an issue. Uses Node.js 22, `npm ci`, and `npm run build`.
+- Created `.github/copilot-instructions.md` — project-level instructions for all Copilot interactions (Chat + coding agent). Covers tech stack, file locations, build/test commands, architecture patterns, AI generation details, auth, storage, and project rules.
+- Chose Node.js 22 to match the project's Next.js 16 + React 19 requirements.
+- Included `npm run build` in setup steps so the agent sees the compiled output and understands the project structure before making changes.
+- Confirmed `.github/workflows/squad-issue-assign.yml` already references the Copilot coding agent at line 78 — no changes needed there.
+- `copilot-instructions.md` mentions the Squad AI team config but explicitly notes the agent doesn't need to follow orchestration rules.
+
+📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus

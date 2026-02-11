@@ -54,3 +54,5 @@ Key learning: `embedded: true` in reveal.js means the deck sizes to fit its cont
 The reveal.js black theme's `--r-heading1-size: 2.5em` = 105px at 42px base. Multi-word titles (3+ words) fill the entire slide viewport, wrapping to 2 lines and pushing subtitles off-screen. Fix: `font-size: min(var(--r-heading1-size, 2.5em), 2em)` caps h1 at 84px — proportional like the revealjs.com demo. Also replaced `untitled-presentation.json` with a proper 5-slide showcase: short 1-word h1 title ("TypeScript"), `class="language-typescript"` on code blocks for hljs detection, comparison table, and h2 closing slide. Key learning: `min()` CSS function is the cleanest way to cap theme custom properties without breaking the variable cascade — it respects the theme value but enforces a ceiling. Build passes, 50 unit tests pass, 34 e2e tests pass.
 
 📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
+
+📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus

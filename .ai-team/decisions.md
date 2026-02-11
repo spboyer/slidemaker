@@ -829,3 +829,9 @@ Exhaustive search of all git history across all 17 branches found **no actual Gi
 - Confirmed `resolveGitHubToken()` in `src/lib/openai.ts` has never had a hardcoded token — uses env var + CLI fallback only.
 
 **Recommendation:** If the team ever suspects a real token was exposed, it should be revoked immediately at https://github.com/settings/tokens regardless of cleanup.
+
+
+### 2026-02-11: Copilot coding agent setup
+**By:** McManus
+**What:** Created `.github/copilot-setup-steps.yml` and `.github/copilot-instructions.md` to enable the GitHub Copilot coding agent for this repository. Setup steps use Node.js 22, `npm ci`, and `npm run build`. Instructions cover the full project context — stack, file locations, commands, architecture patterns, and project rules.
+**Why:** The coding agent needs a working dev environment (setup steps) and project context (instructions) to make useful changes autonomously. Node.js 22 was chosen because Next.js 16 + React 19 requires it. The build step is included so the agent sees compiled output before editing. Instructions are comprehensive but concise — they cover what a new contributor would need to know without being overwhelming.
