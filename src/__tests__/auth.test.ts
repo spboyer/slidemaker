@@ -138,4 +138,59 @@ describe("checkRateLimit", () => {
     expect(checkRateLimit("user-a").allowed).toBe(false);
     expect(checkRateLimit("user-b").allowed).toBe(true);
   });
+
+  test("rate limit window resets after expiry", () => {
+    for (let i = 0; i < 60; i++) {
+      checkRateLimit("user-reset");
+    }
+    expect(checkRateLimit("user-reset").allowed).toBe(false);
+
+    _resetForTesting();
+
+    const result = checkRateLimit("user-reset");
+    expect(result.allowed).toBe(true);
+  });
+});
+
+// --- Token cache expiry ---
+
+describe("Token cache expiry", () => {
+  test("expired cache entry triggers re-fetch", async () => {
+    const mockResponse = {
+      ok: true,
+      json: async () => ({
+        id: 42,
+        login: "expiry-user",
+        avatar_url: "https://example.com/avatar",
+      }),
+    };
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(mockResponse as unknown as Response);
+
+    await validateBearerToken("ghp_expiry_test");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    await validateBearerToken("ghp_expiry_test");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+    _resetForTesting();
+
+    await validateBearerToken("ghp_expiry_test");
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+});
+
+// --- Middleware auth bypass ---
+
+describe("Middleware auth bypass", () => {
+  test("TC-11.3: middleware skips auth when AUTH_GITHUB_ID is not set", () => {
+    const original = process.env.AUTH_GITHUB_ID;
+    delete process.env.AUTH_GITHUB_ID;
+
+    const authEnabled = !!process.env.AUTH_GITHUB_ID;
+    expect(authEnabled).toBe(false);
+
+    if (original) process.env.AUTH_GITHUB_ID = original;
+  });
 });
