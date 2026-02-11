@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "slidemaker": {
+      "command": "npx",
+      "args": ["@slidemaker/mcp-server"],
+      "env": {
+        "SLIDEMAKER_API_URL": "https://your-app.azurecontainerapps.io",
+        "SLIDEMAKER_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
