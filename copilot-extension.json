@@ -1,0 +1,21 @@
+{
+  "name": "slidemaker",
+  "description": "Create AI-powered slide presentations with reveal.js",
+  "parameters": {
+    "topic": {
+      "type": "string",
+      "description": "Topic for the presentation (e.g., 'Introduction to Rust async patterns')",
+      "required": true
+    },
+    "style": {
+      "type": "string",
+      "description": "Presentation style: professional, creative, minimal, or technical",
+      "required": false
+    },
+    "numSlides": {
+      "type": "number",
+      "description": "Number of slides to generate (1-20, default 5)",
+      "required": false
+    }
+  }
+}
