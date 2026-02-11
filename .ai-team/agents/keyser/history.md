@@ -30,3 +30,5 @@
 📌 Team update (2026-02-10): Three CSS rendering fixes — viewport bg/color !important override, code block font-size/styling fix, hljs post-render re-highlighting — verified via Playwright computed styles — decided by Verbal
 📌 Team update (2026-02-10): Slide area polish — compact chrome (~50px saved), fragment visibility in embedded mode, nav control colors via --r-link-color — decided by Verbal
 📌 Team update (2026-02-10): h1 font-size capped at min(2.5em, 2em), showcase presentation updated with TypeScript content — decided by Verbal
+
+📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer

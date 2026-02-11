@@ -96,3 +96,15 @@
 📌 Team update (2026-02-10): Three CSS rendering fixes — viewport bg/color !important override, code block font-size/styling fix, hljs post-render re-highlighting — never use font-size:revert inside .reveal — decided by Verbal
 📌 Team update (2026-02-10): Slide area polish — compact chrome (~50px saved), fragment visibility in embedded mode, nav control colors via --r-link-color — decided by Verbal
 📌 Team update (2026-02-10): h1 font-size capped at min(2.5em, 2em), showcase presentation updated with TypeScript content — decided by Verbal
+
+### 2026-02-10 — Token Audit: No Leaked Credentials Found
+- Exhaustive search of all git history (17 branches, full diff output) for `ghp_`, `gho_`, `ghs_`, `github_pat_` patterns found **zero real tokens** committed.
+- The previously-reported `gho_` leak was in a GitHub issue body (#12), not in repo source code.
+- Replaced `ghp_your_token_here` placeholder in `docs/mcp-setup.md` with `$(gh auth token)` to avoid false positives from secret scanners.
+- Confirmed `.gitignore` already covers `.env*` files — no additions needed.
+- Confirmed test fixtures use obviously-fake tokens only (`ghp_abc123`, `ghp_valid_token`, etc.).
+- `resolveGitHubToken()` in `src/lib/openai.ts` has never contained a hardcoded token value.
+
+📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
+📌 Team update (2026-02-11): Copilot Extension registration docs and copilot-extension.json added — docs only, no code changes — decided by Keyser
+📌 Team update (2026-02-11): MCP client config files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser

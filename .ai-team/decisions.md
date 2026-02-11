@@ -126,10 +126,13 @@ All API routes return JSON errors with appropriate HTTP status. OpenAI 429 → 4
 
 ---
 
-### No Secrets in GitHub Content
-**Author:** Shayne Boyer (via Copilot) · **Date:** 2026-02-10 · **Status:** Directive
+### 2026-02-11: No secrets or tokens in repo content (consolidated)
+**By:** Shayne Boyer, Shayne Boyer (via Copilot)
+**Status:** Directive
 
-Never include secrets (tokens, API keys, credentials, passwords) in GitHub issues, PRs, commit messages, comments, or any repo content. Use environment variables or secret managers only. A leaked `gho_` OAuth token in issue #12 triggered a GitHub secret scanning alert. Preventing recurrence.
+**What:** Never commit GitHub tokens, API keys, credentials, passwords, or any secrets into git — including issues, PRs, commit messages, comments, and repo content. All agents must use environment variable references, secret managers, or placeholders only.
+
+**Why:** A leaked `gho_` OAuth token in GitHub issue #12 triggered a secret scanning alert on 2026-02-10. Shayne issued a standing directive: no secrets in any form. The token audit on 2026-02-11 confirmed no actual tokens were committed to the repository, reinforcing that the policy is working but must remain enforced.
 
 ---
 
@@ -774,3 +777,55 @@ packages/mcp-server/
 ```
 
 **Constraints:** Separate package — does not modify the main Next.js app. Thin client; all business logic lives in the API. Uses stdio transport. TypeScript with ES modules targeting ES2022.
+
+---
+
+### Copilot Extension Registration & Setup Documentation
+**Author:** Keyser (Lead) · **Date:** 2025-07-22 · **Issue:** #46 · **Status:** Proposed
+
+Added documentation and skill definition for registering SlideМaker as a GitHub Copilot Extension:
+
+1. **`copilot-extension.json`** — Skill definition at project root with `topic` (required), `style`, and `numSlides` parameters. Matches the existing `parseSkillsetMessage()` contract in `src/app/api/copilot/skillset/route.ts`.
+
+2. **`docs/copilot-extension-setup.md`** — Step-by-step guide covering GitHub App creation, Copilot Agent enablement, callback URL configuration, installation for users/orgs, usage examples with flags, local testing with curl, and troubleshooting common errors.
+
+3. No code changes — docs only. The existing `/api/copilot/skillset` endpoint already handles the full Copilot Extension flow (auth, message parsing, generation, response formatting).
+
+**Trade-offs:** The skill schema in `copilot-extension.json` is informational (GitHub reads the agent URL, not a local JSON file). Kept it in the repo as a reference contract for the skill's API surface. If GitHub introduces a formal manifest format, this file should be updated to match.
+
+---
+
+### MCP Configuration Files and Client Setup Documentation
+**Author:** Keyser (Lead) · **Date:** 2025-07-23 · **Issue:** #48 · **Status:** Proposed
+
+Added MCP client configuration files and setup documentation for the `@slidemaker/mcp-server` package.
+
+**What was created:**
+
+- `docs/mcp-configs/claude_desktop_config.json` — Claude Desktop MCP server config
+- `docs/mcp-configs/copilot-mcp.json` — GitHub Copilot CLI MCP server config
+- `docs/mcp-configs/vscode-mcp.json` — VS Code MCP server config
+- `docs/mcp-setup.md` — Complete setup guide covering installation, authentication, per-client configuration, all four tool schemas with examples, environment variables reference, and troubleshooting
+
+**Key decisions:**
+
+- Auth token resolution order follows the existing server logic: `SLIDEMAKER_TOKEN` → `GITHUB_TOKEN` → `gh auth token`. Documented all three paths.
+- Claude Desktop config uses the Azure Container Apps URL as default (`https://your-app.azurecontainerapps.io`) since it targets production. Copilot CLI and VS Code configs default to `http://localhost:3000` for local development.
+- Copilot CLI config omits explicit token config because Copilot CLI injects `GITHUB_TOKEN` automatically.
+- No secrets in any committed file — all configs use env var references or placeholders.
+- Tool documentation includes parameter schemas, types, required flags, and natural-language usage examples derived from the actual tool definitions in `packages/mcp-server/src/tools/`.
+
+---
+
+### Token Audit — No Leaked Credentials Found
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Status:** Completed
+
+Exhaustive search of all git history across all 17 branches found **no actual GitHub tokens** (ghp_, gho_, ghs_, github_pat_) committed to the repository. The previously-reported `gho_` leak (referenced in the security directive) occurred in a GitHub issue body (#12), not in repo code.
+
+**Remediation performed:**
+- Replaced `ghp_your_token_here` placeholder in `docs/mcp-setup.md` with `$(gh auth token)` shell substitution to avoid triggering secret scanners.
+- Verified `.gitignore` already covers `.env*` files.
+- Confirmed test fixtures use obviously-fake tokens (`ghp_abc123`, `ghp_valid_token`, etc.).
+- Confirmed `resolveGitHubToken()` in `src/lib/openai.ts` has never had a hardcoded token — uses env var + CLI fallback only.
+
+**Recommendation:** If the team ever suspects a real token was exposed, it should be revoked immediately at https://github.com/settings/tokens regardless of cleanup.

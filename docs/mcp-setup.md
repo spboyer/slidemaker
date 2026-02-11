@@ -26,7 +26,7 @@ Set a token in your shell before starting the server, or configure it in the cli
 
 ```bash
 # Option A: Export directly
-export SLIDEMAKER_TOKEN="ghp_your_token_here"
+export SLIDEMAKER_TOKEN="$(gh auth token)"
 
 # Option B: Use GitHub CLI (no env var needed)
 gh auth login
