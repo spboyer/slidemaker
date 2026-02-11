@@ -37,9 +37,6 @@ jobs:
             const content = fs.readFileSync(teamFile, 'utf8');
             const lines = content.split('\n');
 
-            // Check if @copilot auto-assign is enabled
-            const copilotAutoAssign = content.includes('<!-- copilot-auto-assign: true -->');
-
             // Check if this is a coding agent assignment
             const isCopilotAssignment = memberName === 'copilot';
 
@@ -48,18 +45,14 @@ jobs:
               // @copilot is the GitHub Copilot coding agent — always valid, no roster lookup needed
               assignedMember = { name: '@copilot', role: 'Coding Agent' };
 
-              // Assign @copilot via REST API
-              try {
-                await github.rest.issues.addAssignees({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  assignees: ['copilot']
-                });
-                core.info(`Assigned @copilot to issue #${issue.number}`);
-              } catch (err) {
-                core.warning(`Could not assign @copilot: ${err.message}`);
-              }
+              // Assign copilot-swe-agent to the issue
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: ['copilot-swe-agent']
+              });
+              core.info(`Assigned copilot-swe-agent to issue #${issue.number}`);
             } else {
               let inMembersTable = false;
               for (const line of lines) {
