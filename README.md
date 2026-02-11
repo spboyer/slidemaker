@@ -258,17 +258,41 @@ src/
 │   │   ├── SlideManager.tsx            # Slide sidebar (reorder/delete)
 │   │   ├── PresentationChat.tsx        # AI chat sidebar
 │   │   ├── PresentationList.tsx        # Landing page grid
-│   │   └── ThemePicker.tsx             # Theme selector dropdown
+│   │   ├── ThemePicker.tsx             # Theme selector dropdown
+│   │   ├── AuthProvider.tsx            # Auth.js session provider
+│   │   └── UserMenu.tsx               # Sign-in / avatar / dev mode
 │   └── api/
 │       ├── generate/route.ts           # AI slide generation
+│       ├── auth/[...nextauth]/route.ts # Auth.js route handler
+│       ├── copilot/skillset/route.ts   # Copilot Extension endpoint
 │       └── presentations/
 │           ├── route.ts                # List + Create
 │           └── [slug]/route.ts         # Read + Update + Delete
 ├── lib/
 │   ├── types.ts                        # Shared TypeScript interfaces
 │   ├── openai.ts                       # GitHub Models API client
+│   ├── storage.ts                      # Storage abstraction (local/Azure)
+│   ├── auth-utils.ts                   # Bearer token & rate limiting
+│   ├── presentation-service.ts         # Shared generation + persistence
 │   └── reveal-themes.ts               # Theme definitions
-presentations/                          # JSON file storage
+├── auth.ts                             # Auth.js configuration
+├── middleware.ts                       # CORS + auth middleware
+packages/
+└── mcp-server/                         # MCP server package
+    └── src/
+        ├── index.ts                    # Server entry point
+        ├── api.ts                      # HTTP client for SlideМaker API
+        └── tools/                      # Tool implementations
+            ├── create.ts
+            ├── list.ts
+            ├── get.ts
+            └── delete.ts
+infra/
+├── main.bicep                          # Azure infrastructure (Bicep)
+└── main.bicepparam                     # Default parameters
+docs/
+└── mcp-configs/                        # Example MCP client configs
+presentations/                          # JSON file storage (local dev)
 ```
 
 ## License
