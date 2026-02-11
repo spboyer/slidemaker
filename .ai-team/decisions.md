@@ -563,3 +563,214 @@ The `setCorsHeaders` helper is already extracted as a reusable function for this
 5. **No existing tests broken:** All 50 existing unit tests pass alongside the 11 new todo stubs.
 
 **Impact:** McManus can implement against these test contracts. When each feature merges, Fenster fills in the stubs with real assertions.
+
+---
+
+### Bearer Token Authentication for API Clients
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #42
+
+**What:** Added `Authorization: Bearer <github-token>` support for external API clients (MCP server, Copilot Extension) alongside existing OAuth session auth.
+
+#### How Bearer Token Validation Works
+
+1. Middleware flow: CORS -> auth (session OR bearer) -> rate limit -> next.
+2. If a NextAuth session exists, it takes priority -- bearer token is not checked.
+3. If no session on an API route (`/api/*`), the middleware extracts `Authorization: Bearer <token>` from the request header.
+4. The token is validated by calling `GET https://api.github.com/user` with the token. The response provides `id`, `login`, and `avatar_url`.
+5. Invalid/expired tokens get `401` with `WWW-Authenticate: Bearer` header. All error responses include CORS headers.
+6. Non-API protected routes (e.g. `/presentation/*`) without a session still redirect to sign-in (no bearer support for browser pages).
+
+#### Caching Strategy
+
+- Validated tokens are cached in-memory using a `Map<tokenHash, CachedToken>`.
+- Token keys are SHA-256 hashes (`crypto.createHash('sha256')`) -- raw tokens are never stored.
+- TTL: 5 minutes. After expiry, the next request re-validates against GitHub.
+- A `setInterval` cleanup runs every 60 seconds to evict expired entries (with `.unref()` to avoid blocking Node shutdown).
+
+#### Rate Limiting Behavior
+
+- Fixed-window: 60 requests per 60-second window per user ID.
+- Applies to both session-authenticated and bearer-token-authenticated users.
+- Exceeded limits return `429` with `Retry-After: <seconds>` header (seconds remaining in window).
+- Independent per user -- one user's exhaustion doesn't affect others.
+
+#### Files Changed
+
+- `src/lib/auth-utils.ts` -- New module: `validateBearerToken()`, `checkRateLimit()`, `hashToken()`, token cache, rate limit map.
+- `src/middleware.ts` -- Updated to check bearer token when no session, added rate limiting after auth.
+- `src/__tests__/auth.test.ts` -- 10 tests: token hashing, validation, caching, rate limiting.
+
+#### How to Test
+
+```bash
+# With a valid GitHub token:
+curl -H "Authorization: Bearer $(gh auth token)" http://localhost:3000/api/presentations
+
+# Invalid token (expect 401):
+curl -H "Authorization: Bearer bad_token" http://localhost:3000/api/presentations
+
+# Rate limit test (expect 429 after 60 requests):
+for i in $(seq 1 65); do
+  curl -s -o /dev/null -w "%{http_code}\n" \
+    -H "Authorization: Bearer $(gh auth token)" \
+    http://localhost:3000/api/presentations
+done
+```
+
+---
+
+### Dockerfile + Azure Container Apps Deployment with CI/CD
+**Author:** McManus (Backend Dev / DevOps) · **Date:** 2026-02-10 · **Issue:** #43
+
+#### Dockerfile Build Strategy
+
+Multi-stage Docker build using `node:22-alpine`:
+1. **deps** — `npm ci` installs production + dev dependencies (needed for build).
+2. **build** — Copies `node_modules` from deps, runs `npm run build`. Next.js `output: "standalone"` produces a self-contained `server.js` with only the required `node_modules` subset (~100MB vs ~500MB full).
+3. **runtime** — Copies only `standalone/`, `.next/static/`, and `public/`. Final image contains no source code, no dev dependencies, no build tooling.
+
+Added `output: "standalone"` to `next.config.ts` — the only source code change. `.dockerignore` excludes `node_modules`, `.next`, `.git`, tests, docs, and env files from build context.
+
+`docker-compose.yml` provided for local dev with `.env.local` injection and `presentations/` volume mount.
+
+#### Azure Resources (Bicep IaC)
+
+`infra/main.bicep` provisions:
+- **Azure Container Registry (ACR)** — Basic SKU, admin disabled, pull via managed identity.
+- **Azure Container App** — Runs the Docker image with HTTP ingress on port 3000, scales 0–3 replicas based on concurrent requests.
+- **Container App Environment + Log Analytics Workspace** — Centralized logging.
+- **Azure Storage Account + blob container** (`presentations`) — For production file persistence.
+- **User-assigned Managed Identity** — Granted ACR Pull and Storage Blob Data Contributor roles.
+
+All resource names use `uniqueString(resourceGroup().id)` to avoid collisions. Parameters: `location` (default: resource group location), `resourcePrefix` (default: `slidemaker`), `containerImage`.
+
+`infra/main.bicepparam` provides sensible defaults (eastus2, slidemaker prefix).
+
+#### CI/CD Pipeline Flow
+
+`.github/workflows/deploy.yml` triggers on push to `master` or manual dispatch:
+
+1. **build-and-push** job:
+   - Checks out code
+   - Azure Login via OIDC (federated credentials, no stored secrets)
+   - Deploys/updates infrastructure via `azure/arm-deploy` with Bicep
+   - Logs into ACR via `az acr login`
+   - Builds Docker image tagged with commit SHA + `latest`
+   - Pushes both tags to ACR
+
+2. **deploy** job (depends on build-and-push):
+   - Azure Login via OIDC
+   - Deploys new image to Container App via `azure/container-apps-deploy-action`
+
+#### Required GitHub Secrets
+
+| Secret | Description | How to set |
+|--------|-------------|------------|
+| `AZURE_CLIENT_ID` | App registration client ID for OIDC | Create in Entra ID → App registrations; add federated credential for `repo:spboyer/slidemaker:ref:refs/heads/master` |
+| `AZURE_TENANT_ID` | Entra ID tenant ID | Found in Entra ID → Overview |
+| `AZURE_SUBSCRIPTION_ID` | Target Azure subscription ID | Found in Azure Portal → Subscriptions |
+
+The app registration's service principal needs **Contributor** on the resource group (`slidemaker-rg`) and **AcrPush** on the container registry. Create the resource group before first deploy: `az group create -n slidemaker-rg -l eastus2`.
+
+No API keys or tokens are stored in the pipeline — OIDC federated credentials provide zero-secret auth to Azure.
+
+---
+
+### Copilot Extension Skillset Endpoint
+**Author:** McManus (Backend Dev) · **Date:** 2026-02-10 · **Issue:** #45
+
+Added `POST /api/copilot/skillset` endpoint for GitHub Copilot Extension skill invocations. Key decisions:
+
+1. **Shared presentation service** (`src/lib/presentation-service.ts`): Extracted the generate-and-create logic (AI call, slug generation, storage persistence) into a shared utility `generateAndCreatePresentation()`. Both the existing chat flow and the new Copilot endpoint can use this service, eliminating duplication. The SYSTEM_PROMPT and style instructions are co-located in the service module.
+
+2. **Input parsing**: The skillset endpoint parses the last user message from the Copilot `messages` array. Supports `--style <style>` and `--slides <N>` flags, and strips `/slidemaker` prefix if present. Invalid styles are silently ignored; out-of-range slide counts fall back to default (5).
+
+3. **Auth model**: Uses `X-GitHub-Token` header validation via the existing `validateBearerToken()` from `auth-utils.ts`. When `AUTH_GITHUB_ID` is not set (dev mode), all requests are allowed — matching the middleware pattern.
+
+4. **Response format**: Returns GitHub Copilot Extension format (`{ messages: [{ role: "assistant", content: "..." }] }`) with a formatted summary including edit link, slide count, theme, and slide listing.
+
+5. **Edit URL construction**: Uses `NEXTAUTH_URL` or `VERCEL_URL` env vars to build the presentation edit link, falling back to `http://localhost:3000`.
+
+6. **Error handling**: Missing topic returns a friendly usage hint. AI failures return error message with retry suggestion. Auth failures return 401 with Copilot-format error messages.
+
+7. **Tests**: 15 new tests in `copilot-skillset.test.ts` covering: service exports, route handler export, and `parseSkillsetMessage` parsing (topic extraction, flag parsing, prefix stripping, edge cases). Total test count: 75 passing.
+
+**Files added:**
+- `src/lib/presentation-service.ts` — shared generate+create service
+- `src/app/api/copilot/skillset/route.ts` — Copilot Extension endpoint
+- `src/__tests__/copilot-skillset.test.ts` — unit tests
+
+**Not changed:** Existing generate and presentations routes were left unchanged to avoid risk. They can be refactored to use `presentation-service.ts` in a follow-up.
+
+---
+
+### MCP Server Package for SlideМaker
+**Author:** McManus (Backend Dev) · **Date:** 2025-07-15 · **Status:** Implemented · **Issue:** #47
+
+MCP (Model Context Protocol) is a standard for exposing tools to AI assistants like Claude, Copilot CLI, and other MCP-compatible clients. Created a standalone npm package at `packages/mcp-server/` that wraps the SlideМaker API as MCP tools using `@modelcontextprotocol/sdk` with stdio transport.
+
+The MCP server is a thin HTTP client — all business logic stays in the Next.js API. Each tool validates input, calls the SlideМaker REST API with Bearer token auth, and returns formatted results.
+
+#### Token Resolution Order
+
+1. `SLIDEMAKER_TOKEN` env var
+2. `GITHUB_TOKEN` env var
+3. `gh auth token` CLI output (subprocess, 5s timeout)
+
+If none are found, the server throws a clear error at tool invocation time.
+
+#### Configuration
+
+| Env Var | Description | Default |
+|---|---|---|
+| `SLIDEMAKER_API_URL` | Base URL of the SlideМaker app | `http://localhost:3000` |
+| `SLIDEMAKER_TOKEN` | Auth token (highest priority) | — |
+| `GITHUB_TOKEN` | Fallback auth token | — |
+
+#### MCP Tools
+
+- **`create_presentation`** — Input: `{ topic, style?, numSlides? }`. Calls `POST /api/generate` → `POST /api/presentations`. Style options: professional, creative, minimal, technical.
+- **`list_presentations`** — Input: `{}`. Calls `GET /api/presentations`.
+- **`get_presentation`** — Input: `{ slug }`. Calls `GET /api/presentations/{slug}`.
+- **`delete_presentation`** — Input: `{ slug }`. Calls `DELETE /api/presentations/{slug}`.
+
+#### Running Locally
+
+```bash
+cd packages/mcp-server
+npm install && npm run build
+SLIDEMAKER_API_URL=http://localhost:3000 node dist/index.js
+```
+
+#### Claude Desktop Config
+
+```json
+{
+  "mcpServers": {
+    "slidemaker": {
+      "command": "node",
+      "args": ["path/to/slidemaker/packages/mcp-server/dist/index.js"],
+      "env": { "SLIDEMAKER_API_URL": "http://localhost:3000" }
+    }
+  }
+}
+```
+
+#### Package Structure
+
+```
+packages/mcp-server/
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── index.ts        # MCP server entry, stdio transport, tool routing
+│   ├── api.ts          # Shared HTTP client for SlideМaker API
+│   └── tools/
+│       ├── create.ts   # create_presentation tool
+│       ├── list.ts     # list_presentations tool
+│       ├── get.ts      # get_presentation tool
+│       └── delete.ts   # delete_presentation tool
+└── dist/               # Compiled output (ES2022, ESNext modules)
+```
+
+**Constraints:** Separate package — does not modify the main Next.js app. Thin client; all business logic lives in the API. Uses stdio transport. TypeScript with ES modules targeting ES2022.
