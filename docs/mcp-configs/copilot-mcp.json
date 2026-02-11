@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "slidemaker": {
+      "command": "npx",
+      "args": ["@slidemaker/mcp-server"],
+      "env": {
+        "SLIDEMAKER_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
