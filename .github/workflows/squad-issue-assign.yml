@@ -37,21 +37,45 @@ jobs:
             const content = fs.readFileSync(teamFile, 'utf8');
             const lines = content.split('\n');
 
+            // Check if @copilot auto-assign is enabled
+            const copilotAutoAssign = content.includes('<!-- copilot-auto-assign: true -->');
+
+            // Check if this is a coding agent assignment
+            const isCopilotAssignment = memberName === 'copilot';
+
             let assignedMember = null;
-            let inMembersTable = false;
-            for (const line of lines) {
-              if (line.startsWith('## Members')) {
-                inMembersTable = true;
-                continue;
+            if (isCopilotAssignment) {
+              // @copilot is the GitHub Copilot coding agent — always valid, no roster lookup needed
+              assignedMember = { name: '@copilot', role: 'Coding Agent' };
+
+              // Always assign @copilot to the issue so the coding agent picks it up
+              try {
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  assignees: ['copilot']
+                });
+                core.info(`Assigned @copilot to issue #${issue.number}`);
+              } catch (err) {
+                core.warning(`Could not assign @copilot: ${err.message}`);
               }
-              if (inMembersTable && line.startsWith('## ')) {
-                break;
-              }
-              if (inMembersTable && line.startsWith('|') && !line.includes('---') && !line.includes('Name')) {
-                const cells = line.split('|').map(c => c.trim()).filter(Boolean);
-                if (cells.length >= 2 && cells[0].toLowerCase() === memberName) {
-                  assignedMember = { name: cells[0], role: cells[1] };
+            } else {
+              let inMembersTable = false;
+              for (const line of lines) {
+                if (line.startsWith('## Members')) {
+                  inMembersTable = true;
+                  continue;
+                }
+                if (inMembersTable && line.startsWith('## ')) {
                   break;
+                }
+                if (inMembersTable && line.startsWith('|') && !line.includes('---') && !line.includes('Name')) {
+                  const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+                  if (cells.length >= 2 && cells[0].toLowerCase() === memberName) {
+                    assignedMember = { name: cells[0], role: cells[1] };
+                    break;
+                  }
                 }
               }
             }
@@ -68,17 +92,31 @@ jobs:
             }
 
             // Post assignment acknowledgment
-            const comment = [
-              `### 📋 Assigned to ${assignedMember.name} (${assignedMember.role})`,
-              '',
-              `**Issue:** #${issue.number} — ${issue.title}`,
-              '',
-              `${assignedMember.name} will pick this up in the next Copilot session.`,
-              '',
-              `> **For Copilot coding agent:** If enabled, this issue will be worked automatically.`,
-              `> Otherwise, start a Copilot session and say:`,
-              `> \`${assignedMember.name}, work on issue #${issue.number}\``,
-            ].join('\n');
+            let comment;
+            if (isCopilotAssignment) {
+              comment = [
+                `### 🤖 Routed to @copilot (Coding Agent)`,
+                '',
+                `**Issue:** #${issue.number} — ${issue.title}`,
+                '',
+                `@copilot has been assigned and will pick this up automatically.`,
+                '',
+                `> The coding agent will create a \`copilot/*\` branch and open a draft PR.`,
+                `> Review the PR as you would any team member's work.`,
+              ].join('\n');
+            } else {
+              comment = [
+                `### 📋 Assigned to ${assignedMember.name} (${assignedMember.role})`,
+                '',
+                `**Issue:** #${issue.number} — ${issue.title}`,
+                '',
+                `${assignedMember.name} will pick this up in the next Copilot session.`,
+                '',
+                `> **For Copilot coding agent:** If enabled, this issue will be worked automatically.`,
+                `> Otherwise, start a Copilot session and say:`,
+                `> \`${assignedMember.name}, work on issue #${issue.number}\``,
+              ].join('\n');
+            }
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
