@@ -56,3 +56,18 @@ The reveal.js black theme's `--r-heading1-size: 2.5em` = 105px at 42px base. Mul
 📌 Team update (2026-02-11): No-secrets directive consolidated — never commit tokens, API keys, or secrets into git; use env vars or placeholders only — decided by Shayne Boyer
 
 📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus
+
+### 2026-02-10 — SlideManager polish (left panel)
+- Replaced raw unicode arrows (↑/↓/✕) with inline SVG icon components (`ChevronUp`, `ChevronDown`, `XIcon`) — cleaner rendering across platforms, consistent stroke width.
+- Added mini slide thumbnails: colored accent bar (cycling through 8 Tailwind accent colors) with slide number, plus a content-type label (`Code`, `Table`, `Image`, `Quote`, `List`, `Slide`) derived from slide HTML content.
+- Selected slide state: left indigo accent bar (`w-[3px]`), `ring-1 ring-indigo-500/30` border, `bg-indigo-500/15` background — much more visually distinct than the old `bg-indigo-600/20`.
+- Action buttons (move up/down, delete) now hidden by default, revealed on hover via `group`/`group-hover:opacity-100` — reduces visual clutter.
+- Added `transition-all duration-150` on slide items for smooth hover/select state changes.
+- Header: uppercase tracking-wider label with pill-shaped slide count badge.
+- Panel open/close: replaced conditional render (`{showManager && ...}`) with CSS width/opacity transition (`transition-all duration-200 ease-in-out`, `w-64` ↔ `w-0`) in `page.tsx` — smooth slide-in animation instead of hard cut.
+- Key files: `SlideManager.tsx` (component), `presentation/[slug]/page.tsx` (panel integration).
+- Pattern established: inline SVG icon components for UI icons (no icon library dependency). Content-type detection via regex on `slide.content`.
+
+📌 Team update (2026-02-20): Copilot Extension registration docs and copilot-extension.json skill definition added — docs only, no code changes — decided by Keyser
+
+📌 Team update (2026-02-20): MCP client configuration files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser

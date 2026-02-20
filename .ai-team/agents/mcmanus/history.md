@@ -118,3 +118,7 @@
 - `copilot-instructions.md` mentions the Squad AI team config but explicitly notes the agent doesn't need to follow orchestration rules.
 
 📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus
+
+📌 Team update (2026-02-20): Copilot Extension registration docs and copilot-extension.json skill definition added — docs only, no code changes — decided by Keyser
+
+📌 Team update (2026-02-20): MCP client configuration files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser

@@ -36,3 +36,4 @@
 📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus
 
 📌 Team update (2025-07-23): Issue audit — #44 (CORS), #45 (Copilot skillset), #46 (Copilot extension docs) all closed as complete. #49 (e2e tests) left open — missing e2e/auth.spec.ts and e2e/mcp-server.spec.ts — decided by Keyser
+📌 Team update (2026-02-20): SlideManager now uses inline SVG icons, hover-reveal action buttons, mini thumbnails with accent colors, CSS width transition for panel open/close — decided by Verbal

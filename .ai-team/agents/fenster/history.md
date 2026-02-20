@@ -48,3 +48,8 @@
 📌 Team update (2026-02-11): Token audit completed — no real tokens found in git history, placeholder in docs/mcp-setup.md cleaned up — decided by McManus
 
 📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus
+📌 Team update (2026-02-20): Copilot Extension registration docs and copilot-extension.json skill definition added — docs only, no code changes — decided by Keyser
+
+📌 Team update (2026-02-20): MCP client configuration files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser
+
+📌 Team update (2026-02-20): SlideManager now uses inline SVG icons, hover-reveal action buttons, mini thumbnails with accent colors, CSS width transition for panel open/close — decided by Verbal
