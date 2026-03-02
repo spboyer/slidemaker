@@ -10,10 +10,15 @@ AI-powered slide presentation builder. Describe a topic, get a polished reveal.j
 - **6 Transitions** — None, Fade, Slide, Convex, Concave, Zoom (per-slide or global)
 - **Speaker Notes** — Add talking points visible only to the presenter (`S` key)
 - **Presentation Styles** — Professional, Creative, Minimal, Technical — each with tailored tone and theme suggestions
-- **Live Editing** — Side-by-side Markdown/HTML editor with instant preview
-- **Slide Management** — Reorder, add, delete, and duplicate slides
-- **Keyboard Navigation** — Arrow keys, fullscreen (`F`), overview mode (`O`)
+- **6 Slide Layouts** — Default, Center, Two-Column, Timeline, Stat Cards, Grid Cards
+- **Live Editing** — Side-by-side Markdown/HTML editor with instant preview, layout picker, background customization (color, gradient, image), fragment toggle, and auto-animate control
+- **Slide Management** — Reorder, add, delete, and duplicate slides with automatic type detection (Code, Table, Image, Quote, List)
+- **Auto-Animate** — Smooth transitions between consecutive slides with matching elements
+- **Slide Search** — Find slides instantly with `Cmd+K` / `Ctrl+K` full-text search
+- **Keyboard Navigation** — Arrow keys, fullscreen (`F`), overview mode (`O`), search (`Cmd+K` / `Ctrl+K`)
+- **PPTX Export** — Download presentations as native PowerPoint files via `pptxgenjs`
 - **PDF Export** — Print to PDF via `?print-pdf` query parameter
+- **AI Chat Theme Commands** — Say "change theme to moon" in the chat sidebar to switch themes instantly
 - **Auto-save** — Every edit persists immediately via the API
 - **JSON Storage** — Presentations stored as version-control-friendly JSON files
 - **GitHub OAuth** — Sign in with GitHub, with dev mode bypass for local development
@@ -32,7 +37,8 @@ AI-powered slide presentation builder. Describe a topic, get a polished reveal.j
 | Language | [TypeScript](https://www.typescriptlang.org) |
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
 | Slides | [reveal.js 5.x](https://revealjs.com) |
-| AI | [GitHub Models API](https://github.com/marketplace/models) via OpenAI SDK |
+| Export | [pptxgenjs](https://github.com/gitbrent/PptxGenJS) — PowerPoint generation |
+| AI | [GitHub Models API](https://github.com/marketplace/models) (`openai/gpt-4o`) via OpenAI SDK |
 | Auth | [Auth.js v5](https://authjs.dev) (NextAuth.js) — GitHub OAuth |
 | Testing | [Vitest](https://vitest.dev), [Playwright](https://playwright.dev) |
 
@@ -161,7 +167,11 @@ The MCP server and Copilot Extension both use Bearer tokens to authenticate with
 ### Edit Slides
 
 - Click **Edit** to open the side-by-side editor (Markdown/HTML on the left, live preview on the right)
-- Modify the title, content, speaker notes, transition, and background color
+- Modify the title, content, speaker notes, and transition
+- **Layout** — Choose from 6 layouts: Default, Center, Two-Column, Timeline, Stat Cards, Grid Cards
+- **Background** — Set a background color, CSS gradient, or image URL per slide
+- **Fragments** — Toggle stepped reveals to wrap list items with `class="fragment"` for one-at-a-time display
+- **Auto-Animate** — Enable per-slide for smooth element transitions between consecutive slides
 - Changes save automatically
 
 ### Navigate & Present
@@ -172,7 +182,8 @@ The MCP server and Copilot Extension both use Bearer tokens to authenticate with
 | `F` | Toggle fullscreen |
 | `O` | Overview mode (see all slides at once) |
 | `S` | Open speaker notes window |
-| `Esc` | Exit fullscreen or overview |
+| `Cmd+K` / `Ctrl+K` | Open slide search |
+| `Esc` | Exit fullscreen, overview, or search |
 
 ### Add Slides
 
@@ -183,9 +194,14 @@ The MCP server and Copilot Extension both use Bearer tokens to authenticate with
 
 Use the theme picker dropdown to switch between 11 reveal.js themes. Theme changes apply instantly and persist with the presentation.
 
-### Export to PDF
+### Search
 
-Append `?print-pdf` to the presentation URL and use your browser's print dialog (`Ctrl+P` / `Cmd+P`) to save as PDF.
+Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) to open the slide search modal. Type to filter slides by title or content, use `↑`/`↓` to navigate results, `Enter` to jump to a slide, and `Esc` to close.
+
+### Export
+
+- **PPTX** — Click the **Download PPTX** button in the navigation bar to export the presentation as a native PowerPoint file.
+- **PDF** — Append `?print-pdf` to the presentation URL and use your browser's print dialog (`Ctrl+P` / `Cmd+P`) to save as PDF.
 
 ## 💾 Presentation Storage
 
@@ -658,6 +674,7 @@ src/
 │   │   ├── SlideManager.tsx            # Slide sidebar (reorder/delete)
 │   │   ├── PresentationChat.tsx        # AI chat sidebar
 │   │   ├── PresentationList.tsx        # Landing page grid
+│   │   ├── SlideSearch.tsx              # Cmd+K search modal
 │   │   ├── ThemePicker.tsx             # Theme selector dropdown
 │   │   ├── AuthProvider.tsx            # Auth.js session provider
 │   │   └── UserMenu.tsx               # Sign-in / avatar / dev mode
@@ -673,6 +690,7 @@ src/
 │   ├── openai.ts                       # GitHub Models API client
 │   ├── storage.ts                      # Storage abstraction (local/Azure)
 │   ├── auth-utils.ts                   # Bearer token & rate limiting
+│   ├── pptx-export.ts                  # PowerPoint export via pptxgenjs
 │   ├── presentation-service.ts         # Shared generation + persistence
 │   └── reveal-themes.ts               # Theme definitions
 ├── auth.ts                             # Auth.js configuration

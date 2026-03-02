@@ -1,0 +1,48 @@
+{
+  "id": "mastering-waza",
+  "title": "Mastering Waza",
+  "createdAt": "2026-02-20T04:23:19.608Z",
+  "updatedAt": "2026-02-20T04:23:19.608Z",
+  "slides": [
+    {
+      "title": "",
+      "content": "<h1>Mastering Waza</h1><p>A walkthrough on demoing and using the CLI tool</p>",
+      "notes": "Start by introducing Waza as a CLI tool designed to streamline workflows. Highlight that this presentation will provide a step-by-step guide on how to demo its capabilities and use it effectively. Spend ~1 minute on the intro and gauge familiarity — ask the audience if anyone has prior experience with Waza.",
+      "transition": "fade",
+      "backgroundGradient": "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)",
+      "layout": "center"
+    },
+    {
+      "title": "",
+      "content": "<h2>What is Waza?</h2><p>A CLI tool for building and managing modern SaaS applications.</p>",
+      "notes": "Explain the purpose of Waza — a tool aimed at simplifying the development and deployment of SaaS apps. Highlight its key features, such as scaffolding, deployment automation, or integrations. Spend ~2 minutes here, and ask: 'Has anyone used a similar CLI tool before? What was your experience like?'",
+      "transition": "convex",
+      "backgroundColor": "#1a1a3e",
+      "layout": "center"
+    },
+    {
+      "title": "Getting Started",
+      "content": "<ul><li class='fragment fade-up'>Clone the repository: <code>git clone https://github.com/spboyer/waza.git</code></li><li class='fragment fade-up'>Install dependencies: <code>npm install</code></li><li class='fragment fade-up'>Run the tool: <code>npm start</code></li></ul>",
+      "notes": "Walk through the setup process step-by-step. Emphasize how simple it is to clone the repository, install dependencies, and run the tool. Mention that this process sets the foundation for all future demos. Spend ~3 minutes here, optionally showing a live terminal demo.",
+      "transition": "slide",
+      "backgroundColor": "#16213e",
+      "layout": "default"
+    },
+    {
+      "title": "Key Commands in Waza",
+      "content": "<pre><code data-trim data-noescape data-line-numbers=\"1-2|4-5\" class=\"language-shell\"># Start a new project\nwaza init my-project\n\n# Add a new feature\nwaza add feature-name</code></pre>",
+      "notes": "Highlight some of the most important commands in Waza for demo purposes. Explain what each command does: 'init' sets up a new project scaffold, while 'add' helps include a new feature or module. Demonstrate live or explain with examples. Spend ~4 minutes here. Prompt: 'Which of these features do you think would be most useful to you?'",
+      "transition": "convex",
+      "backgroundColor": "#0f3460",
+      "layout": "default"
+    },
+    {
+      "title": "",
+      "content": "<h2>Next Steps with Waza</h2><ul><li class='fragment fade-up'>Explore the <a href='https://github.com/spboyer/waza'>GitHub repository</a></li><li class='fragment fade-up'>Check out the documentation</li><li class='fragment fade-up'>Experiment with the examples provided</li><li class='fragment fade-up'>Start your first project today 🚀</li></ul>",
+      "notes": "End with actionable next steps for the audience. Encourage them to explore the GitHub repo, go through the documentation, and start experimenting with Waza. Mention that they can reach out to the contributors on GitHub for any questions or issues. Conclude the presentation and thank the audience for their time.",
+      "transition": "fade",
+      "backgroundGradient": "linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #8B2252 100%)",
+      "layout": "center"
+    }
+  ]
+}

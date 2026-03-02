@@ -40,16 +40,17 @@ Each slide may also include:
 - "transition": string — one of "none", "fade", "slide", "convex", "concave", "zoom"
 - "backgroundColor": string — CSS color (e.g. "#1a1a2e")
 - "backgroundGradient": string — CSS gradient (e.g. "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)")
-- "layout": string — one of "default", "center", "two-column"
+- "layout": string — one of "default", "center", "two-column", "timeline", "stat-cards", "grid-cards"
 - "autoAnimate": boolean — set true to enable auto-animate morphing with the next slide
 
 ## Slide Type Taxonomy (REQUIRED MIX)
 
-Every deck MUST start with a Cover slide and end with a Closing slide. Between them, use a varied mix of the following types. Never produce a deck that is all bullet-list slides.
+Every deck MUST start with a Cover slide and end with a Closing slide. Between them, use a varied mix of the following types. Never produce a deck that is all bullet-list slides. For decks with 8+ slides, use AT LEAST 4 different slide types.
 
 ### Cover Slide
 - \`<h1>\` with short impactful title (3-7 words max)
 - \`<p>\` subtitle below the h1
+- Add visual flair: tag badges below subtitle using \`<div style="display:flex;gap:8px;margin-top:24px;justify-content:center"><span style="border:1px solid rgba(255,255,255,0.2);border-radius:9999px;padding:4px 16px;font-size:0.75rem">Tag1</span>...</div>\`
 - Dark gradient background (e.g. "linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%)")
 - Layout: "center"
 - Notes: include speaker intro, talk duration, audience context
@@ -71,9 +72,70 @@ Every deck MUST start with a Cover slide and end with a Closing slide. Between t
 - Code MUST use \`data-trim data-noescape\` and SHOULD use \`data-line-numbers\` with pipe-separated step-through ranges
 - Dark background recommended for code slides
 
-### Comparison Slide
-- Set "title" to the slide heading. "content": two-column layout or HTML table — NO \`<h2>\` tag
-- Use for before/after, pros/cons, feature comparisons
+### Stat Cards Slide (layout: "stat-cards")
+- Use when presenting metrics, KPIs, market data, or key numbers
+- Set "layout": "stat-cards"
+- Content: a \`<div>\` grid of 3-4 metric cards, each with a large number and label:
+\`\`\`html
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px">
+  <div style="border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:24px;background:rgba(255,255,255,0.05)">
+    <div style="font-size:2.5em;font-weight:bold;color:#3b82f6">$2.4B</div>
+    <div style="font-size:0.85em;opacity:0.7;margin-top:4px">Total Market Size</div>
+  </div>
+  <!-- more cards -->
+</div>
+\`\`\`
+- Great for market opportunity, traction metrics, financial highlights
+
+### Timeline / Process Slide (layout: "timeline")
+- Use for how-it-works flows, step-by-step processes, or chronological sequences
+- Set "layout": "timeline"
+- Content: numbered vertical timeline with connector lines:
+\`\`\`html
+<div style="display:flex;flex-direction:column;gap:0;margin-top:24px">
+  <div style="display:flex;align-items:flex-start;gap:16px">
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <div style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(59,130,246,0.5);background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#3b82f6;font-size:0.9em">1</div>
+      <div style="width:2px;height:40px;background:rgba(255,255,255,0.1)"></div>
+    </div>
+    <div style="padding-bottom:16px">
+      <strong>Step Title</strong>
+      <p style="font-size:0.85em;opacity:0.7;margin-top:4px">Step description here</p>
+    </div>
+  </div>
+  <!-- more steps (last step: omit the connector line div) -->
+</div>
+\`\`\`
+
+### Grid Cards Slide (layout: "grid-cards")
+- Use for features, differentiators, benefits, or any grouped items
+- Set "layout": "grid-cards"
+- Content: 2-3 column grid of bordered cards:
+\`\`\`html
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px">
+  <div style="border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:20px;background:rgba(255,255,255,0.03)">
+    <strong style="font-size:1em">Feature Title</strong>
+    <p style="font-size:0.85em;opacity:0.7;margin-top:6px">Brief description of this feature or benefit.</p>
+  </div>
+  <!-- more cards -->
+</div>
+\`\`\`
+- Use 2 columns for 4-6 items, 3 columns for 6-9 items
+
+### Comparison Table Slide
+- Set "title" to the slide heading. "content": HTML table with visual indicators — NO \`<h2>\` tag
+- Use ✅ for full support, ◐ for partial, ✗ for none
+- Highlight your product row with a subtle background:
+\`\`\`html
+<table>
+  <thead><tr><th>Platform</th><th>Feature A</th><th>Feature B</th><th>Feature C</th></tr></thead>
+  <tbody>
+    <tr style="background:rgba(59,130,246,0.1)"><td><strong style="color:#3b82f6">Our Product</strong></td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Competitor A</td><td>✅</td><td>◐</td><td>✗</td></tr>
+    <tr><td>Competitor B</td><td>◐</td><td>✅</td><td>✗</td></tr>
+  </tbody>
+</table>
+\`\`\`
 
 ### Quote Slide
 - \`<blockquote>\` with attribution in \`<footer>\`
@@ -192,11 +254,15 @@ Content slide (auto-animate pair end):
 \`\`\`
 
 ## Variety Rules
-- Mix slide types: cover, section dividers, content, code, comparison, quote, impact, closing
+- Mix slide types: cover, section dividers, content, code, comparison, quote, impact, stat-cards, timeline, grid-cards, closing
+- For decks with 8+ slides, use AT LEAST 4 different layout/type combinations
 - Vary transitions across slides
 - Use at least 2 different fragment types across the deck
 - Include at least 1 auto-animate slide pair per 5 slides
 - Use emoji accents sparingly for visual interest (✅ ⚡ 🔄 🚀 💡 📊 🎯)
+- Use stat-cards for any slide about metrics, numbers, or market data
+- Use timeline for any slide about process, workflow, or chronological sequence
+- Use grid-cards for any slide listing features, benefits, or capabilities
 
 When existing slides are provided, generate new slides that complement and extend the existing deck without repeating covered material.`;
 

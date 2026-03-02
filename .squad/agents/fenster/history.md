@@ -1,6 +1,6 @@
 # Project Context
 
-- **Owner:** Shayne Boyer (spboyer@live.com)
+- **Owner:** Shayne Boyer
 - **Project:** AI-powered slide presentation builder — Next.js web app with OpenAI-driven slide generation, persistent JSON storage in /presentations
 - **Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, OpenAI API
 - **Created:** 2026-02-10
@@ -48,8 +48,18 @@
 📌 Team update (2026-02-11): Token audit completed — no real tokens found in git history, placeholder in docs/mcp-setup.md cleaned up — decided by McManus
 
 📌 Team update (2026-02-11): Copilot coding agent setup added — decided by McManus
+
 📌 Team update (2026-02-20): Copilot Extension registration docs and copilot-extension.json skill definition added — docs only, no code changes — decided by Keyser
 
 📌 Team update (2026-02-20): MCP client configuration files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser
 
 📌 Team update (2026-02-20): SlideManager now uses inline SVG icons, hover-reveal action buttons, mini thumbnails with accent colors, CSS width transition for panel open/close — decided by Verbal
+
+- **2026-02-22:** Full test suite review. 85 tests passing, 1 skipped (TC-10.5 BlobStorage — requires Azure). No `test.todo()` stubs remain. Key findings:
+  - **smoke.test.ts** duplicates `generateSlug` 3 times instead of importing from `presentation-service.ts`. If the real implementation changes, these tests are blind to it.
+  - **copilot-skillset.test.ts** reimplements `parseSkillsetMessage` locally instead of importing it from the route. Same blind-copy risk.
+  - **CRUD tests** verify file I/O directly, not the actual Next.js route handlers — they don't test HTTP status codes, validation errors, or Content-Type headers. TC-7.4–7.6, TC-7.10–7.11, TC-7.13–7.15, TC-7.17 are all missing.
+  - **TC-8.x (AI generation)** — zero unit tests. Needs mocked OpenAI client to test without API calls.
+  - **auth.test.ts TC-11.3** is a tautology — checks `!!process.env.AUTH_GITHUB_ID` directly, doesn't exercise middleware.
+  - **storage.test.ts** uses `process.cwd` override — functional but fragile.
+  - No test.todo stubs left — all Phase 2 scaffolded stubs were replaced with real implementations or marked skip.

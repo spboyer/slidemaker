@@ -10,9 +10,11 @@ import RevealSlideshow, {
 import SlideNav from "@/app/components/SlideNav";
 import SlideEditor from "@/app/components/SlideEditor";
 import SlideManager from "@/app/components/SlideManager";
+import SlideSearch from "@/app/components/SlideSearch";
 import PresentationChat from "@/app/components/PresentationChat";
 import ThemePicker from "@/app/components/ThemePicker";
 import UserMenu from "@/app/components/UserMenu";
+import { exportToPptx } from "@/lib/pptx-export";
 
 export default function PresentationPage() {
   const params = useParams<{ slug: string }>();
@@ -27,6 +29,7 @@ export default function PresentationPage() {
   const [editing, setEditing] = useState(false);
   const [showManager, setShowManager] = useState(false);
   const [showChat, setShowChat] = useState(isNew);
+  const [showSearch, setShowSearch] = useState(false);
   const [addingSlide, setAddingSlide] = useState(false);
   const revealRef = useRef<RevealSlideshowRef>(null);
 
@@ -205,6 +208,27 @@ export default function PresentationPage() {
     window.open(`${window.location.pathname}?print-pdf`, "_blank");
   }, []);
 
+  const handlePptxExport = useCallback(async () => {
+    if (!presentation) return;
+    try {
+      await exportToPptx(presentation);
+    } catch (err) {
+      console.error("PPTX export failed:", err);
+    }
+  }, [presentation]);
+
+  // Cmd+K / Ctrl+K to open slide search
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearch((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
   const handleSaveSlide = (updated: Slide) => {
     if (!presentation) return;
     const newSlides = [...presentation.slides];
@@ -343,9 +367,13 @@ export default function PresentationPage() {
 
   return (
     <div className="flex h-screen w-screen bg-slate-900">
-      {/* Slide manager sidebar */}
-      {showManager && (
-        <div className="w-64 shrink-0 border-r border-white/10">
+      {/* Slide manager sidebar — smooth open/close transition */}
+      <div
+        className={`shrink-0 border-r border-white/10 transition-all duration-200 ease-in-out ${
+          showManager ? "w-64 opacity-100" : "w-0 opacity-0 overflow-hidden border-r-0"
+        }`}
+      >
+        <div className="h-full w-64">
           <SlideManager
             slides={slides}
             currentIndex={currentSlideIndex}
@@ -358,7 +386,7 @@ export default function PresentationPage() {
             onMoveDown={handleMoveDown}
           />
         </div>
-      )}
+      </div>
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -436,6 +464,8 @@ export default function PresentationPage() {
           onFullscreen={handleFullscreen}
           onOverview={() => revealRef.current?.toggleOverview()}
           onPdfExport={handlePdfExport}
+          onPptxExport={handlePptxExport}
+          onSearch={() => setShowSearch(true)}
         />
       </div>
 
@@ -449,6 +479,18 @@ export default function PresentationPage() {
             onThemeChange={handleThemeChange}
           />
         </div>
+      )}
+
+      {/* Slide search overlay (Cmd+K) */}
+      {showSearch && (
+        <SlideSearch
+          slides={slides}
+          onSelect={(index) => {
+            setCurrentSlideIndex(index);
+            revealRef.current?.goToSlide(index);
+          }}
+          onClose={() => setShowSearch(false)}
+        />
       )}
     </div>
   );

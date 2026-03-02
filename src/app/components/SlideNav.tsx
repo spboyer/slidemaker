@@ -13,6 +13,8 @@ interface SlideNavProps {
   onFullscreen?: () => void;
   onOverview?: () => void;
   onPdfExport?: () => void;
+  onPptxExport?: () => void;
+  onSearch?: () => void;
 }
 
 export default function SlideNav({
@@ -26,6 +28,8 @@ export default function SlideNav({
   onFullscreen,
   onOverview,
   onPdfExport,
+  onPptxExport,
+  onSearch,
 }: SlideNavProps) {
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalSlides - 1;
@@ -100,6 +104,26 @@ export default function SlideNav({
             aria-label="Export to PDF"
           >
             📄
+          </button>
+        )}
+        {onPptxExport && (
+          <button
+            onClick={onPptxExport}
+            className={btnBase}
+            title="Export to PPTX"
+            aria-label="Export to PowerPoint"
+          >
+            📊
+          </button>
+        )}
+        {onSearch && (
+          <button
+            onClick={onSearch}
+            className={btnBase}
+            title="Search slides (⌘K)"
+            aria-label="Search slides"
+          >
+            🔍
           </button>
         )}
         <span className="px-1 text-xs font-medium text-white/80">

@@ -6,7 +6,7 @@ export type SlideTransition =
   | "concave"
   | "zoom";
 
-export type SlideLayout = "default" | "center" | "two-column";
+export type SlideLayout = "default" | "center" | "two-column" | "timeline" | "stat-cards" | "grid-cards";
 
 export interface Slide {
   title: string;

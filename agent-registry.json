@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "squads": [
+    {
+      "id": "slidemaker",
+      "name": "slidemaker",
+      "description": "AI-powered slide presentation builder — Next.js web app with OpenAI-driven slide generation and persistent JSON storage.",
+      "path": "c:\\Users\\shboyer\\GitHub\\slidemaker",
+      "icon": "🔷",
+      "universe": "unknown",
+      "launchCommand": ""
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Project Context
 
-- **Owner:** Shayne Boyer (spboyer@live.com)
+- **Owner:** Shayne Boyer
 - **Project:** AI-powered slide presentation builder — Next.js web app with OpenAI-driven slide generation, persistent JSON storage in /presentations
 - **Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, OpenAI API
 - **Created:** 2026-02-10
@@ -122,3 +122,12 @@
 📌 Team update (2026-02-20): Copilot Extension registration docs and copilot-extension.json skill definition added — docs only, no code changes — decided by Keyser
 
 📌 Team update (2026-02-20): MCP client configuration files and setup docs added for Claude Desktop, Copilot CLI, VS Code — decided by Keyser
+
+### 2026-02-22 — README.md Updated to Reflect Current Capabilities
+- Updated Features list: added PPTX Export, Slide Search (Cmd+K), 6 Slide Layouts, Auto-Animate, AI Chat Theme Commands, slide type auto-detection, background customization, fragment toggle.
+- Updated Tech Stack table: added `pptxgenjs` as Export layer, clarified AI model as `openai/gpt-4o`.
+- Updated Keyboard Navigation table: added `Cmd+K` / `Ctrl+K` for search.
+- Updated Edit Slides section: documented layout picker, background (color/gradient/image), fragment toggle, auto-animate checkbox.
+- Replaced "Export to PDF" section with unified "Export" section covering both PPTX download button and PDF print method. Added "Search" section.
+- Updated Project Structure: added `SlideSearch.tsx` and `pptx-export.ts` entries.
+- Sections NOT touched (confirmed accurate): Architecture, Project Structure layout, API Reference, MCP Server, Copilot Extension, Environment Variables, Deployment, Authentication, Prerequisites, Getting Started.

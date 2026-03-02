@@ -1450,3 +1450,126 @@ Exhaustive search of all git history across all 17 branches found **no actual Gi
 **By:** Verbal
 **What:** Replaced unicode arrows/symbols (↑↓✕) with inline SVG icon components. Action buttons (move, delete) are hidden by default and shown on hover via Tailwind `group-hover`. Panel open/close uses CSS width transition instead of conditional render.
 **Why:** Unicode renders inconsistently across platforms and looks unpolished. Hover-reveal reduces visual clutter — the old 3-button cluster on every slide item made the list feel busy. CSS transition for panel open/close provides smooth animation instead of a hard mount/unmount cut. These patterns should be followed for any future sidebar or list components.
+
+
+# Decision: README.md Comprehensive Update
+
+**Date:** 2026-02-22  
+**Author:** McManus (Backend Dev)  
+**Requested by:** Shayne Boyer  
+**Status:** Complete
+
+## Context
+
+The README.md was out of date — it didn't document PPTX export, slide search, the 6 layout types, auto-animate, background customization, fragment toggle, AI chat theme commands, or slide type auto-detection. The tech stack table was missing the PPTX export library, and the keyboard navigation table was missing Cmd+K.
+
+## Decision
+
+Made targeted edits to the existing README.md rather than a full rewrite. Updated only the sections that were stale (Features, Tech Stack, Usage, Keyboard Navigation, Project Structure). Left all accurate sections untouched (Architecture, API Reference, MCP Server, Copilot Extension, Deployment, Auth, Environment Variables).
+
+## Changes
+
+1. **Features list**: Added 5 new bullets (PPTX Export, Slide Search, 6 Layouts, Auto-Animate, AI Chat Theme Commands). Updated existing bullets for Live Editing (now mentions layout/background/fragments/auto-animate) and Slide Management (now mentions type detection).
+2. **Tech Stack**: Added `pptxgenjs` row, clarified AI model as `openai/gpt-4o`.
+3. **Keyboard Navigation**: Added `Cmd+K` / `Ctrl+K` row.
+4. **Edit Slides section**: Expanded with layout, background, fragment, and auto-animate docs.
+5. **Export section**: Replaced "Export to PDF" with a unified "Export" section (PPTX + PDF).
+6. **Search section**: New section documenting the Cmd+K modal workflow.
+7. **Project Structure**: Added `SlideSearch.tsx` and `pptx-export.ts`.
+
+## Rationale
+
+Every feature documented was verified against the actual codebase (`types.ts`, `SlideSearch.tsx`, `pptx-export.ts`, `SlideEditor.tsx`, `SlideManager.tsx`, `PresentationChat.tsx`, `package.json`). No speculative features added.
+
+
+# Decision: Unit Test Suite Review — Gaps & Recommendations
+
+**Date:** 2026-02-22  
+**Author:** Fenster (Tester)  
+**Requested by:** Shayne Boyer  
+**Status:** Review
+
+## Results
+
+- **85 tests passing**, 1 skipped (BlobStorage — requires Azure). 4 test files. No failures, no warnings.
+- All `test.todo()` stubs from Phase 2 scaffolding have been replaced with real tests or `test.skip`.
+
+## Issues Found
+
+### P1 — Tests validating local copies instead of real code
+
+1. **`smoke.test.ts`** defines `generateSlug()` 3 times locally instead of importing from `@/lib/presentation-service`. If the production implementation drifts, tests won't catch it.
+2. **`copilot-skillset.test.ts`** reimplements `parseSkillsetMessage()` inline. Same risk — tests pass even if the real parser is broken.
+
+**Recommendation:** Import these functions from their real modules. If they're not exported, export them.
+
+### P1 — Missing test plan coverage
+
+These test-plan cases have no unit test implementation:
+
+- **TC-7.4–7.6** (POST validation: missing title, invalid slides, missing fields)
+- **TC-7.10–7.11** (PUT non-existing, invalid body)
+- **TC-7.13–7.15, TC-7.17** (DELETE non-existing, path traversal via API, Content-Type, metadata-only list)
+- **TC-8.1–8.8** (AI generation — all cases; needs mocked OpenAI client)
+- **TC-11.1–11.2** (unauthenticated 401, valid session access)
+- **TC-13.1–13.3** (Copilot Extension integration)
+- **TC-14.1–14.4** (MCP server tools)
+
+### P2 — Shallow middleware test
+
+`auth.test.ts` TC-11.3 checks `!!process.env.AUTH_GITHUB_ID` directly — a tautology that doesn't exercise the real middleware bypass path.
+
+## What's Working Well
+
+- Storage abstraction tests (`storage.test.ts`) are solid — full CRUD lifecycle with isolated temp dirs.
+- Auth token hashing, validation, caching, and rate limiting tests are well-structured and test real behavior.
+- Type compilation tests catch type regressions at compile time.
+- No flaky tests observed.
+
+## Recommended Next Steps
+
+1. Refactor `smoke.test.ts` and `copilot-skillset.test.ts` to import from real modules (McManus).
+2. Add mocked-OpenAI tests for TC-8.x (McManus — owns the generate API).
+3. Add route-handler-level tests for TC-7.4–7.6, TC-7.10–7.15, TC-7.17 using direct handler imports with mock Request objects (Fenster).
+
+# Decision: Test Suite Quality Review — Critical Gaps
+
+**Date:** 2026-02-22  
+**Author:** Keyser (Lead)  
+**Status:** Action Required  
+**Requested by:** Shayne Boyer
+
+## Context
+
+Reviewed all unit tests (src/__tests__/) and e2e tests (e2e/) against the test plan (test-plan.md) for quality, coverage, and antipatterns.
+
+## Critical Findings
+
+### 1. Duplicated Production Code in Tests (HIGH)
+`generateSlug()` is copied 3 times in smoke.test.ts and once in copilot-skillset.test.ts instead of importing from `presentation-service.ts`. `parseSkillsetMessage()` is fully replicated in copilot-skillset.test.ts. Tests validate their own local copies — not the real functions. If the production code changes, tests still pass.
+
+**Fix:** Import `generateSlug` from `@/lib/presentation-service` and `parseSkillsetMessage` from the route module.
+
+### 2. CRUD Tests Bypass API Route Handlers (HIGH)
+TC-7.x tests use raw `fs` calls to test file I/O, not the route handlers. 10 test cases from the plan are unimplemented: TC-7.4, 7.5, 7.6, 7.10, 7.11, 7.13, 7.14, 7.15, 7.17 — all negative/error validation paths.
+
+**Fix:** Test route handlers directly by invoking the exported GET/POST/PUT/DELETE functions with mock Request objects and asserting Response status/body.
+
+### 3. Zero TC-8.x Coverage (HIGH)
+All 8 test cases for the AI generation API are documented but none are implemented. No mocked tests for request validation, error mapping, or response shape.
+
+**Fix:** Mock `getOpenAIClient()` and test the generate route's parsing, validation, and error responses.
+
+### 4. Auth Bypass Test is a No-Op (MEDIUM)
+TC-11.3 tests `!!undefined === false`, not middleware behavior.
+
+### 5. Cache Expiry Test is Misleading (LOW)
+Uses `_resetForTesting()` instead of `vi.useFakeTimers()` to simulate TTL expiry.
+
+## Recommendation
+
+Fenster should address items 1-3 before we ship. Items 4-5 are quality improvements that can go in a follow-up pass. The e2e suite is solid and doesn't need structural changes.
+
+## Impact
+
+Without these fixes, the unit test suite gives false confidence — it can pass while real bugs exist in slug generation, API validation, and the generate endpoint.

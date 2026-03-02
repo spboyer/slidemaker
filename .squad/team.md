@@ -29,7 +29,7 @@
 
 ## Project Context
 
-- **Owner:** Shayne Boyer (spboyer@live.com)
+- **Owner:** Shayne Boyer
 - **Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, OpenAI API
 - **Description:** AI-powered slide presentation builder with persistent JSON storage in /presentations
 - **Created:** 2026-02-10

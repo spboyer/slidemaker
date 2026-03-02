@@ -45,3 +45,8 @@ next-env.d.ts
 
 # dev screenshots
 /screenshots/
+
+# nested package build artifacts & deps
+packages/*/dist/
+packages/*/node_modules/
+packages/*/package-lock.json

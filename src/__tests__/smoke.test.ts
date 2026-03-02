@@ -90,6 +90,9 @@ describe("Extended Slide type (reveal.js fields)", () => {
       "default",
       "center",
       "two-column",
+      "timeline",
+      "stat-cards",
+      "grid-cards",
     ];
     layouts.forEach((l) => {
       const s: Slide = { title: "T", content: "C", layout: l };
